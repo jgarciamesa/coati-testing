@@ -25,7 +25,7 @@ aln/mecm/%: $(RAW_PATH)/%
 aln/prank/%: $(RAW_PATH)/%
 	@echo -ne "prank align $*\r"
 	@prank -codon -d="$<" -o=$@ -quiet &>/dev/null
-	@mv $@.best.fas $@
+	@if [ -f $@.best.fas ]; then mv $@.best.fas $@; else touch $@; fi
 
 aln/mafft/%: $(RAW_PATH)/%
 	@echo -ne "mafft align $*\r"
@@ -59,46 +59,46 @@ clean_initial_all:
 # coati models vs prank vs mafft vs clustalO using REFERENCE aligments         #
 ################################################################################
 
-aln/ref/coati/%: $(DATA)/no_gaps_ref/%
+aln/ref/coati/%: | $(REF_PATH)/%
 	@echo -ne "coati align $*\r"
-	@./bin/coati-alignpair $(REF_PATH)/$* -m coati -o $@
+	@./bin/coati-alignpair $< -m coati -o $@
 
-aln/ref/mcoati/%: $(DATA)/no_gaps_ref/%
+aln/ref/mcoati/%: | $(REF_PATH)/%
 	@echo -ne "mcoati align $*\r"
-	@./bin/coati-alignpair $(REF_PATH)/$* -m m-coati -o $@
+	@./bin/coati-alignpair $< -m m-coati -o $@
 
-aln/ref/dpmcoati/%: $(DATA)/no_gaps_ref/%
+aln/ref/dpmcoati/%: | $(REF_PATH)/%
 	@echo -ne "dpmcoati align $*\r"
-	@./bin/coati-alignpair $(REF_PATH)/$* -m dp-mcoati -o $@
+	@./bin/coati-alignpair $< -m dp-mcoati -o $@
 
-aln/ref/dna/%: $(DATA)/no_gaps_ref/%
+aln/ref/dna/%: | $(REF_PATH)/%
 	@echo -ne "dna align $*\r"
-	@./bin/coati-alignpair $(REF_PATH)/$* -m dna -o $@
+	@./bin/coati-alignpair $< -m dna -o $@
 
-aln/ref/ecm/%: $(DATA)/no_gaps_ref/%
+aln/ref/ecm/%: | $(REF_PATH)/%
 	@echo -ne "ecm align $*\r"
-	@./bin/coati-alignpair $(REF_PATH)/$* -m ecm -o $@
+	@./bin/coati-alignpair $< -m ecm -o $@
 
-aln/ref/mecm/%: $(DATA)/no_gaps_ref/%
+aln/ref/mecm/%: | $(REF_PATH)/%
 	@echo -ne "mecm align $*\r"
-	@./bin/coati-alignpair $(REF_PATH)/$* -m m-ecm -o $@
+	@./bin/coati-alignpair $< -m m-ecm -o $@
 
-aln/ref/prank/%: $(DATA)/no_gaps_ref/%
+aln/ref/prank/%: | $(REF_PATH)/%
 	@echo -ne "prank align $*\r"
-	@prank -codon -d="$(REF_PATH)/"$* -o=$@ -quiet &>/dev/null
-	@mv $@.best.fas $@
+	@prank -codon -d="$<" -o=$@ -quiet &>/dev/null
+	@if [ -f $@.best.fas ]; then mv $@.best.fas $@; else touch $@; fi
 
-aln/ref/mafft/%: $(DATA)/no_gaps_ref/%
+aln/ref/mafft/%: | $(REF_PATH)/%
 	@echo -ne "mafft align $*\r"
-	@mafft --quiet --preservecase --globalpair --maxiterate 1000 $(REF_PATH)/$* > $@
+	@mafft --quiet --preservecase --globalpair --maxiterate 1000 $< > $@
 
-aln/ref/clustalo/%: $(DATA)/no_gaps_ref/%
+aln/ref/clustalo/%: | $(REF_PATH)/%
 	@echo -ne "clustalo align $*\r"
-	@clustalo -i $(REF_PATH)/$* -o $@
+	@clustalo -i $< -o $@
 
-aln/ref/macse/%: $(DATA)/no_gaps_ref/%
+aln/ref/macse/%: | $(REF_PATH)/%
 	@echo -ne "macse align $*\r"
-	@java -jar bin/macse_v2.06.jar -fs_lr 10 -stop_lr 10 -prog alignSequences -seq $(REF_PATH)/$* -out_NT $@ -out_AA output_AA_$* &>/dev/null
+	@java -jar bin/macse_v2.06.jar -fs_lr 10 -stop_lr 10 -prog alignSequences -seq $< -out_NT $@ -out_AA output_AA_$* &>/dev/null
 	@rm output_AA_$*
 	@sed -i 's/!/-/g' $@
 	

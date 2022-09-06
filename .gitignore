@@ -1,0 +1,20 @@
+# data
+data/*
+!data/.gitkeep
+
+# raw-data
+raw_data/*
+!raw_data/gorilla_geneId.tsv
+!raw_data/dmelanogaster_geneId.tsv
+!raw_data/mouse_geneId.tsv
+
+# fasta file
+*.fasta
+*.fas
+*.fa
+
+# results folder
+results/*
+
+# helper scripts
+scripts/helper/*
