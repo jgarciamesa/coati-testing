@@ -26,9 +26,8 @@ DOWNLOAD_GENES = $(addsuffix .fasta,$(addprefix $(RAW_PATH)/,$(shell head -n${N}
 download_genes: $(DOWNLOAD_GENES) raw_data/$(SPECIES)_geneId.tsv
 
 $(RAW_PATH)/%.fasta: | scripts/get_sequences.R raw_data/$(SPECIES)_geneId.tsv
-	@echo "Downloading " $*
 	$(shell $(RSCRIPT) scripts/get_sequences.R raw_data/${SPECIES}_geneId.tsv $* $(@D))
-	@echo -ne "Downloaded "$(shell ls ${RAW_PATH}/*.fasta | wc -l)" out of ${N}.\r"
+	@echo -ne "Downloaded " $* "("$(shell ls ${RAW_PATH}/*.fasta | wc -l)" out of ${N}).\r"
 
 ################################################################################
 # Initial alignments with all methods (aln recipes in Makefile_aln.mak)        #
@@ -39,7 +38,7 @@ INITIAL_ALIGNMENTS = $(DOWNLOAD_GENES) \
 					$(addprefix aln/mafft/,$(GENES)) \
  					$(addprefix aln/mcoati/,$(GENES)) \
 					$(addprefix aln/clustalo/,$(GENES))\
- 					$(addprefix aln/prank/,$(GENES))\
+ 					$(addprefix aln/prank/,$(GENES))#\
 					$(addprefix aln/coati/,$(GENES)) \
 					$(addprefix aln/dna/,$(GENES)) \
 					$(addprefix aln/ecm/,$(GENES)) \
@@ -47,8 +46,8 @@ INITIAL_ALIGNMENTS = $(DOWNLOAD_GENES) \
 ################################################################################
 # Identify which initial alignments have gaps                                  #
 ################################################################################
-# MODELS = mecm macse mafft mcoati clustalo prank
-MODELS = coati mcoati dna ecm mecm prank mafft clustalo macse
+MODELS = mecm macse mafft mcoati clustalo prank
+# MODELS = coati mcoati dna ecm mecm prank mafft clustalo macse
 GAPS_FILE = data/$(SPECIES)/gaps.csv
 $(GAPS_FILE): scripts/gaps.sh | $(INITIAL_ALIGNMENTS)
 	@echo "Find alignments with gaps     "
@@ -119,7 +118,7 @@ ALIGN_REFERENCE = no_gaps_reference \
 				$(addprefix aln/ref/mafft/,$(ALN)) \
  				$(addprefix aln/ref/mcoati/,$(ALN)) \
 				$(addprefix aln/ref/clustalo/,$(ALN))\
- 				$(addprefix aln/ref/prank/,$(ALN))\
+ 				$(addprefix aln/ref/prank/,$(ALN))#\
 				$(addprefix aln/ref/coati/,$(ALN)) \
 				$(addprefix aln/ref/dna/,$(ALN)) \
 				$(addprefix aln/ref/ecm/,$(ALN)) 
@@ -138,8 +137,8 @@ $(DATA)/dseq_summary.csv: scripts/dseq_summary.R $(DATA)/dseq.csv
 	@cat $@
 
 $(DATA)/dseq.csv: | $(ALIGN_REFERENCE) $(ALN_DSEQ)
-# 	$(shell sed -i '1 i\filename,mecm,macse,mafft,mcoati,clustalo,prank' $@)
-	$(shell sed -i '1 i\filename,mecm,macse,mafft,mcoati,clustalo,prank,coati,dna,ecm' $@)
+	$(shell sed -i '1 i\filename,mecm,macse,mafft,mcoati,clustalo,prank' $@)
+# 	$(shell sed -i '1 i\filename,mecm,macse,mafft,mcoati,clustalo,prank,coati,dna,ecm' $@)
 
 $(DATA)/%.dseq: scripts/pa_distance.R
 	@echo "dseq $*"
