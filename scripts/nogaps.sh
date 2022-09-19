@@ -7,17 +7,16 @@ then
 fi
 
 species=$1
-N=$2
 output="data/${species}/nogaps.csv"
 
 rm -f ${output}
 
-for file in $(head -n${N} raw_data/${species}_geneId.tsv | cut -f1)
+for file in $(cat data/${species}/filtered.csv | cut -f1)
 do
-	c=$(grep -c $(basename ${file}) data/${species}/gaps.csv)
+	c=$(grep -c ${file} data/${species}/gaps.csv)
 	if [ ${c} -eq 0 ]
 	then
-		echo $(basename ${file}) >> ${output}
+		echo ${file} >> ${output}
 	fi
 done
 
