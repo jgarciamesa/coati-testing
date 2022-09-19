@@ -9,10 +9,10 @@ species=gorilla
 
 # n - number of sequences. Default: 4000.
 #  MAX values: gorilla 16809, mouse 15922, dmelanogaster 3157
-n=10
+n=4000
 
 # len - max length of sequences. Default: 3500 nucs/seq.
-len=3000
+len=7000
 
 # number of parallel jobs
 j=1
