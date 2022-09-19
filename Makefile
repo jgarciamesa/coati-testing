@@ -7,66 +7,82 @@ SHELL = /bin/bash
 SPECIES ?= gorilla
 RAW_PATH = raw_data/$(SPECIES)
 N ?= 4000
+LEN ?= 7000
 
 ################################################################################
 # Download gene ID table from Ensembl (use to update files)                    #
 ################################################################################
 
-raw_data/%_geneId.tsv: | scripts/get_geneId.R
+.PHONY: download_geneid
+download_geneid: | raw_data/$(SPECIES)_geneId.tsv
+
+raw_data/%_geneId.tsv: scripts/get_geneId.R
 	@echo "Downloading" $* "gene IDs"
-	@$(RSCRIPT) scripts/get_geneId.R $* $@
+	@$(RSCRIPT) $< $* $@
 
 ################################################################################
 # Download first N sequences from ENSEMBL                                      #
 ################################################################################
 GENES = $(addsuffix .fasta,$(shell head -n${N} ${RAW_PATH}_geneId.tsv | cut -f1))
-DOWNLOAD_GENES = $(addsuffix .fasta,$(addprefix $(RAW_PATH)/,$(shell head -n${N} ${RAW_PATH}_geneId.tsv | cut -f1)))
+DOWNLOAD_GENES = $(addprefix $(RAW_PATH)/,$(GENES))
 
 .PHONY: download_genes
-download_genes: $(DOWNLOAD_GENES) raw_data/$(SPECIES)_geneId.tsv
+download_genes: $(DOWNLOAD_GENES)
 
 $(RAW_PATH)/%.fasta: | scripts/get_sequences.R raw_data/$(SPECIES)_geneId.tsv
-	$(shell $(RSCRIPT) scripts/get_sequences.R raw_data/${SPECIES}_geneId.tsv $* $(@D))
+	@$(shell $(RSCRIPT) scripts/get_sequences.R raw_data/${SPECIES}_geneId.tsv $* $(@D))
 	@echo -ne "Downloaded " $* "("$(shell ls ${RAW_PATH}/*.fasta | wc -l)" out of ${N}).\r"
+
+################################################################################
+# Filter sequences by length												   #
+################################################################################
+
+.PHONY: filter
+filter: data/$(SPECIES)/filtered.csv
+
+data/$(SPECIES)/filtered.csv: $(DOWNLOAD_GENES) scripts/filter_seqs.sh
+	@bash scripts/filter_seqs.sh $(SPECIES) $(N) $(LEN) $@
 
 ################################################################################
 # Initial alignments with all methods (aln recipes in Makefile_aln.mak)        #
 ################################################################################
+.PHONY: initial_alignment
+
+FILTERED = $(shell cat data/${SPECIES}/filtered.csv 2> /dev/null)
 INITIAL_ALIGNMENTS = $(DOWNLOAD_GENES) \
-					$(addprefix aln/mecm/,$(GENES)) \
-					$(addprefix aln/macse/,$(GENES)) \
-					$(addprefix aln/mafft/,$(GENES)) \
- 					$(addprefix aln/mcoati/,$(GENES)) \
-					$(addprefix aln/clustalo/,$(GENES))\
- 					$(addprefix aln/prank/,$(GENES))#\
-					$(addprefix aln/coati/,$(GENES)) \
-					$(addprefix aln/dna/,$(GENES)) \
-					$(addprefix aln/ecm/,$(GENES)) \
+					$(addprefix aln/mecm/,$(FILTERED)) \
+					$(addprefix aln/macse/,$(FILTERED)) \
+					$(addprefix aln/mafft/,$(FILTERED)) \
+					$(addprefix aln/mcoati/,$(FILTERED)) \
+					$(addprefix aln/clustalo/,$(FILTERED)) \
+					$(addprefix aln/prank/,$(FILTERED)) \
+					$(addprefix aln/coati/,$(FILTERED)) \
+					$(addprefix aln/dna/,$(FILTERED)) \
+					$(addprefix aln/ecm/,$(FILTERED)) \
+
+initial_alignment: $(INITIAL_ALIGNMENTS)
 
 ################################################################################
 # Identify which initial alignments have gaps                                  #
 ################################################################################
-MODELS = mecm macse mafft mcoati clustalo prank
-# MODELS = coati mcoati dna ecm mecm prank mafft clustalo macse
+MODELS = coati mcoati dna ecm mecm prank mafft clustalo macse
 GAPS_FILE = data/$(SPECIES)/gaps.csv
+
 $(GAPS_FILE): scripts/gaps.sh | $(INITIAL_ALIGNMENTS)
-	@echo "Find alignments with gaps     "
+	@echo "Find alignments with gaps               "
 	@$(shell bash $< ${SPECIES} ${MODELS})
-	@$(eval GAPS=$(addsuffix .gap,$(shell cat data/$(SPECIES)/gaps.csv)))
 
 ################################################################################
 # Create cigar strings with indel types for simulation                         #
 ################################################################################
-# GAPS = $(addsuffix .gap,$(shell cat $(GAPS_FILE)))
+GAPS = $(addsuffix .gap,$(shell cat $(GAPS_FILE) 2> /dev/null))
 
-data/$(SPECIES)/gaps_cigar.csv: scripts/gaps2cigar.R $(GAPS_FILE)
-	@echo "Encoding gap patterns using CIGAR strings"
-	@$(eval GAPS=$(addsuffix .gap,$(shell cat data/$(SPECIES)/gaps.csv))) && $(shell $(MAKE) $(GAPS) N=$(N) SPECIES=$(SPECIES))
+data/$(SPECIES)/gaps_cigar.csv: scripts/gaps2cigar.R | $(GAPS_FILE) $(GAPS)
 	@echo "Encoded gap patterns using CIGAR strings"
 
 # extract gap information and encode it using CIGAR strings
 %.gap: scripts/gaps2cigar.R
-	@echo -ne "Encoding gaps from " $* "\r"
+	@echo -ne "Encoding gaps from " $* "     \r"
 	@$(shell ${RSCRIPT} $< $* | cut -d '"' -f 2 >> $(DATA)/gaps_cigar.csv)
 
 ################################################################################
@@ -75,42 +91,38 @@ data/$(SPECIES)/gaps_cigar.csv: scripts/gaps2cigar.R $(GAPS_FILE)
 
 data/$(SPECIES)/nogaps.csv: scripts/nogaps.sh $(GAPS_FILE)
 	@echo "Find alignments without gaps"
-	@bash $< ${SPECIES} ${N}
+	@bash $< ${SPECIES}
 	@mkdir -p data/$(SPECIES)/ref_alignments
-	@$(eval REF_ALIG=$(addprefix ${DATA}/ref_alignments/,$(addsuffix .fasta,$(shell cat ${DATA}/nogaps.csv))))
 
 ################################################################################
 # Generate alignments with biologically inferred indel information (cigar str) #
 ################################################################################
 DATA = data/$(SPECIES)
-# REF_ALIG = $(addprefix ${DATA}/ref_alignments/,$(addsuffix .fasta,$(shell cat ${DATA}/nogaps.csv)))
+REF_ALIG = $(addprefix ${DATA}/ref_alignments/,$(shell cat ${DATA}/nogaps.csv 2> /dev/null))
+$(mkdir -p data/$(SPECIES)/ref_alignments)
 
 .PHONY: reference
-reference: $(DATA)/gaps_cigar.csv $(DATA)/nogaps.csv
-	@mkdir -p data/$(SPECIES)/ref_alignments
-	@echo "Creating reference alignments"
-	@$(eval REF_ALIG=$(addprefix ${DATA}/ref_alignments/,$(addsuffix .fasta,$(shell cat ${DATA}/nogaps.csv)))) && $(shell $(MAKE) $(REF_ALIG) N=$(N) SPECIES=$(SPECIES))
-	@echo "Finished creating reference alignments"
+reference: $(REF_ALIG) | $(DATA)/nogaps.csv
+	@echo "Done creating reference alignments"
 
-$(DATA)/ref_alignments/%: scripts/simulate2.R scripts/write_fasta.R $(DATA)/gaps_cigar.csv
-# 	@echo "Creating reference alignment $*"
+$(DATA)/ref_alignments/%: scripts/simulate2.R scripts/write_fasta.R
 	@echo -ne "Creating reference alignment $*\r"
 	@$(shell ${RSCRIPT} $< ${SPECIES} ${RAW_PATH}/$* $@)
 
 ################################################################################
 # Create reference alignments with no gaps for testing                         #
 ################################################################################
+$(mkdir -p data/$(SPECIES)/no_gaps_ref)
 
 .PHONY: no_gaps_reference
-no_gaps_reference: reference
+no_gaps_reference: $(REF_ALIG)
 	$(shell bash scripts/rem_gaps_ref.sh $(SPECIES))
-	@$(eval ALN=$(shell ls ${DATA}/no_gaps_ref))
 
 ################################################################################
 # Align simulated alignments with all methods (aln recipes in Makefile_aln.mak)#
 ################################################################################
 REF_PATH = $(DATA)/no_gaps_ref
-ALN = $(shell mkdir -p $(REF_PATH); ls $(REF_PATH)/)
+ALN = $(shell mkdir -p $(REF_PATH); ls $(REF_PATH)/ )
 
 ALIGN_REFERENCE = no_gaps_reference \
 				$(addprefix aln/ref/mecm/,$(ALN)) \
@@ -118,7 +130,7 @@ ALIGN_REFERENCE = no_gaps_reference \
 				$(addprefix aln/ref/mafft/,$(ALN)) \
  				$(addprefix aln/ref/mcoati/,$(ALN)) \
 				$(addprefix aln/ref/clustalo/,$(ALN))\
- 				$(addprefix aln/ref/prank/,$(ALN))#\
+				$(addprefix aln/ref/prank/,$(ALN))\
 				$(addprefix aln/ref/coati/,$(ALN)) \
 				$(addprefix aln/ref/dna/,$(ALN)) \
 				$(addprefix aln/ref/ecm/,$(ALN)) 
@@ -136,9 +148,8 @@ $(DATA)/dseq_summary.csv: scripts/dseq_summary.R $(DATA)/dseq.csv
 	$(shell Rscript --vanilla $^ $@)
 	@cat $@
 
-$(DATA)/dseq.csv: | $(ALIGN_REFERENCE) $(ALN_DSEQ)
-	$(shell sed -i '1 i\filename,mecm,macse,mafft,mcoati,clustalo,prank' $@)
-# 	$(shell sed -i '1 i\filename,mecm,macse,mafft,mcoati,clustalo,prank,coati,dna,ecm' $@)
+$(DATA)/dseq.csv: $(ALN_DSEQ)
+	$(shell sed -i '1 i\filename,mecm,macse,mafft,mcoati,clustalo,prank,coati,dna,ecm' $@)
 
 $(DATA)/%.dseq: scripts/pa_distance.R
 	@echo "dseq $*"
@@ -157,8 +168,8 @@ clean_pipeline:
 	rm -f data/$(SPECIES)/*.csv
 	rm -f data/$(SPECIES)/no_gaps_ref/*
 	rm -f data/$(SPECIES)/ref_alignments/*
-	rm -f aln/{coati,mcoati,dna,ecm,mecm,prank,mafft,clustalo,macse,baliphy}/*
-	rm -f aln/ref/{coati,mcoati,dna,ecm,mecm,prank,mafft,clustalo,macse,baliphy}/*
+	rm -f aln/{coati,mcoati,dna,ecm,mecm,prank,mafft,clustalo,macse}/*
+	rm -f aln/ref/{coati,mcoati,dna,ecm,mecm,prank,mafft,clustalo,macse}/*
 	rm -f data/dseq.csv
 	rm -f data/dseq_summary.csv
 
