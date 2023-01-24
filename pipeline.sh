@@ -69,12 +69,11 @@ make reference SPECIES=${species} N=${n} -j${j}
 tput setaf 11; echo "Remove gaps from true alignments, creating benchmark data set"
 tput setaf 15
 make no_gaps_reference SPECIES=${species} N=${n}
-#for file in data/${species}/no_gaps_ref/*; do mv $file data/${species}/no_gaps_ref/$(basename $file .ref); done
 
 # align reference alignments
 tput setaf 11; echo "Align benchmark data set sequences"
 tput setaf 15
-make align_ref SPECIES=${species} N=${n} -j${j}
+make align_ref SPECIES=${species} N=${n} -j${j} -i
 
 # compute statistics
 tput setaf 11; echo "Compute summary statistics"

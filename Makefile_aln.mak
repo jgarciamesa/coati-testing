@@ -67,10 +67,6 @@ aln/ref/mcoati/%: $(REF_PATH)/%
 	@echo -ne "mcoati align $*\r"
 	@./bin/coati-alignpair $< -m m-coati -o $@
 
-aln/ref/dpmcoati/%: $(REF_PATH)/%
-	@echo -ne "dpmcoati align $*\r"
-	@./bin/coati-alignpair $< -m dp-mcoati -o $@
-
 aln/ref/dna/%: $(REF_PATH)/%
 	@echo -ne "dna align $*\r"
 	@./bin/coati-alignpair $< -m dna -o $@

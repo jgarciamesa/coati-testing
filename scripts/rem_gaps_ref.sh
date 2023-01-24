@@ -1,4 +1,3 @@
-mkdir -p ./data/no_gaps_ref
 
 if [ $# -lt 1 ]
 then
