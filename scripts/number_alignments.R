@@ -1,5 +1,5 @@
 
-main = function(species) {
+num_alns = function(species) {
     dseq = read.csv(paste0("data/",species,"/dseq.csv"), header = TRUE, stringsAsFactors = FALSE)
 #dseq = read.csv("../data/mouse/dseq.csv", header = TRUE, stringsAsFactors = FALSE)
 #dpos = read.csv("../data/dpos.csv", header = TRUE)
@@ -46,7 +46,7 @@ print(imp)
 
 if(!interactive()) {
     ARGS = commandArgs(trailing = TRUE)
-    main(ARGS[1])
+    num_alns(ARGS[1])
 }
 
 
