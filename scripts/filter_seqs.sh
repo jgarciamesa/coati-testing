@@ -1,13 +1,12 @@
 # filter sequences by length - discard long sequences
 
-SPECIES=$1
-N=$2
-SIZE=$3
-OUTPUT=$4
+N=$1
+SIZE=$2
+OUTPUT=$3
 
 rm -f ${OUTPUT}
 
-for file in $(ls raw_data/${SPECIES}/* | head -n${N} )
+for file in $(ls raw_data/${SPECIES}/*.fasta | head -n${N} )
 do
 	s=$(stat --printf="%s" ${file})
 	if [ ${s} -le ${SIZE} ]

@@ -1,4 +1,4 @@
-library(seqinr)
+suppressMessages(library(seqinr))
 library(stringr)
 
 #################### code modified from Reed A Cartwright ######################
@@ -14,6 +14,7 @@ ks = function(a) {
 }
 
 omega = function(a) { #dN/dS
+    if(class(a) != "alignment") {return(NA)}
 	k = kaks(a)
 	ka = k$ka[1]
 	ks = k$ks[1]
@@ -62,18 +63,22 @@ process_aln = function(d,fasta) {
 
 ################################################################################
 
-k_metric = function(species, ARGS) {
+k_metric = function(ARGS) {
+    results = data.frame("ka RMSE" = double(),
+                         "ks RMSE" = double(),
+                         "F1-score pos selection" = double(),
+                         "F1-score neg selection" = double())
 	for(i in ARGS){
 		# read alignments
 		model = list.files(paste0("aln/ref/",i), pattern = "*.fasta")
-		ref = list.files(paste0("data/",species,"/ref_alignments"),pattern = "*.fasta")
+		ref = list.files(paste0("data/ref_alignments"),pattern = "*.fasta")
 
 		if(length(ref) != length(model)) {
 			warning(paste("Number of sequences between ref and", i, "differs by", abs(length(ref)-length(model))))
 		}
 
 		# remove insertions w.r.t. model organism (human)
-		ref = process_aln(paste0("data/",species,"/ref_alignments"),model)
+		ref = process_aln(paste0("data/ref_alignments"),model)
 		model = process_aln(paste0("aln/ref/",i),model)
 
 		# calculate ka
@@ -100,18 +105,7 @@ k_metric = function(species, ARGS) {
 		# calculate accuracy of negative selection
 		model_neg = ns_accuracy(ref_omega,model_omega) 
 
-		print(paste0("Species ",species," with model ",i))
-		print(paste0("ka root mean-squared error:",model_rmse_ka))
-		print(paste0("ks root mean-squared error:",model_rmse_ks))
-		print(paste0("Accuracy of + selection:",model_pos))
-		print(paste0("Accuracy of - selection:",model_neg))
+		results[i,] = c(model_rmse_ka, model_rmse_ks, model_pos, model_neg)
 	}
-
+    return(results)
 }
-
-if(!interactive()) {
-	ARGS = commandArgs(trailing=TRUE)
-	k_metric(species = ARGS[1],ARGS[2:length(ARGS)])
-}
-
-

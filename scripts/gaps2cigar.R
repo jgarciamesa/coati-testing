@@ -1,7 +1,6 @@
 library(seqinr)
 library(stringr)
 
-
 gaps_cigar = function(fasta) {
 	if(file.exists(fasta)) {
 		seqs = read.fasta(fasta, set.attributes = TRUE, forceDNAtolower = FALSE)
@@ -51,8 +50,7 @@ gaps_cigar = function(fasta) {
 	}
 	
 	cigar = paste(cigar,paste(count,current,sep=""),sep="")
-	print(cigar)
-
+	print(paste0(basename(fasta), ",", cigar, ",", basename(dirname(fasta))))
 }
 
 if(!interactive()) {

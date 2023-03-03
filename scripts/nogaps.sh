@@ -1,19 +1,13 @@
 # create a file with the name of the pairwise aligned ENSEMBL sequences
 #  that DON'T contain gaps
 
-if [ $# -lt 1 ]
-then
-	echo "At least one argument is required"
-fi
-
-species=$1
-output="data/${species}/nogaps.csv"
+output="data/nogaps.csv"
 
 rm -f ${output}
 
-for file in $(cat data/${species}/filtered.csv | cut -f1)
+for file in $(cat data/filtered.csv | cut -f1)
 do
-	c=$(grep -c ${file} data/${species}/gaps.csv)
+	c=$(grep -c ${file} data/gaps.csv)
 	if [ ${c} -eq 0 ]
 	then
 		echo ${file} >> ${output}

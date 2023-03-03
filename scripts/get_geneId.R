@@ -12,41 +12,23 @@ library(dplyr, warn.conflicts = FALSE)
 # For documentation of this version:
 # browseVignettes("biomaRT")
 
-get_geneId = function(species, output) {
-	dir.create(file.path("raw_data",species), showWarnings = FALSE,
+get_geneId = function(output) {
+	dir.create(file.path("raw_data"), showWarnings = FALSE,
 	           recursive = TRUE)
-
-	#output = paste0("raw_data/",species,"_geneId.tsv")
 
 	# Query to Ensembl and select homo sapiens gene dataset
 	ensembl_h = useMart("ensembl", dataset = "hsapiens_gene_ensembl")
 	# Filters to use
 	filters = c("with_ccds")
 	# Attributes to retrieve
-	if(species == "gorilla") {
-		attributes = c("ensembl_gene_id", "ggorilla_homolog_ensembl_gene", "ggorilla_homolog_orthology_type")
-	} else if(species == "mouse") {
-		attributes = c("ensembl_gene_id", "mmusculus_homolog_ensembl_gene", "mmusculus_homolog_orthology_type")
-	} else if(species == "dmelanogaster") {
-		attributes = c("ensembl_gene_id", "dmelanogaster_homolog_ensembl_gene", "dmelanogaster_homolog_orthology_type")
-	} else {
-		stop(paste0("species ", species," not supported."))
-	}
+	attributes = c("ensembl_gene_id", "ggorilla_homolog_ensembl_gene", "ggorilla_homolog_orthology_type")
 	values = list(TRUE)#, TRUE)
 
 	human_otherspecies = getBM(attributes, filters, values,
 		mart = ensembl_h, uniqueRows = TRUE)
 
 	# Filter one one2one (121) orthologs
-	if(species == "gorilla") {
-		human_otherspecies_121_orth = filter(human_otherspecies, ggorilla_homolog_orthology_type == "ortholog_one2one")
-	} else if(species == "mouse") {
-		human_otherspecies_121_orth = filter(human_otherspecies, mmusculus_homolog_orthology_type == "ortholog_one2one")
-	} else if(species == "dmelanogaster") {
-		human_otherspecies_121_orth = filter(human_otherspecies, dmelanogaster_homolog_orthology_type == "ortholog_one2one")
-	} else {
-	    stop(paste0("species ", species, " not supported."))
-	}
+	human_otherspecies_121_orth = filter(human_otherspecies, ggorilla_homolog_orthology_type == "ortholog_one2one")
 
 	# sort
 	genes = human_otherspecies_121_orth[order(human_otherspecies_121_orth$ensembl_gene_id),]
@@ -58,6 +40,6 @@ get_geneId = function(species, output) {
 
 if(!interactive()) {
 	ARGS = commandArgs(trailingOnly = TRUE)
-	get_geneId(species = ARGS[1], output = ARGS[2])
+	get_geneId(output = ARGS[1])
 }
 

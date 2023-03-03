@@ -1,18 +1,14 @@
 # create a file with the name of the pairwise aligned ENSEMBL sequences
 #  that contain gaps
 
-if [ $# -lt 2 ]
+if [ $# -lt 1 ]
 then
-	echo "At least two arguments are required"
+	echo "At least one argument is required"
 fi
 
-species="$1"
-output="data/${species}/gaps.csv"
+output="data/gaps.csv"
 
-shift 1
-
-mkdir -p "data/${species}/"
-#rm -f "data/${species}/gaps_${species}_tmp.csv"
+mkdir -p "data/"
 rm -f ${output}
 
 for arg in $@

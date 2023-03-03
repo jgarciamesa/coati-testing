@@ -6,8 +6,9 @@ library(TeachingDemos)
 simulate_two_main = function(input, output) {
     seqs = read.fasta(input, set.attributes=FALSE, forceDNAtolower=FALSE)
 
-	char2seed(basename(input))
-	cigars = sample(cigar, length(cigar))
+	char2seed(basename(gsub(".fasta", "", output)))
+	cigar_id = sample.int(n = length(cigar), size = 1)
+	cigars = cigar[cigar_id]
 	current_cigar = 1
 
     repeat {
@@ -71,6 +72,12 @@ simulate_two_main = function(input, output) {
         break;
     }
     write.fasta(sequences = sims, file.out = output)
+    print(paste0(
+        gaps_file$raw_name[cigar_id], ",",
+        gaps_file$cigar[cigar_id], ",",
+        gaps_file$origin[cigar_id], ",",
+        basename(output)
+    ))
 }
 
 if(!interactive()) {
@@ -82,9 +89,8 @@ if(!interactive()) {
 	# maximum length of a M before glue starts
 	G = 99
 
-	species = ARGS[1]
-
-	gaps = scan(paste0("./data/",species,"/gaps_cigar.csv"),character(0),quiet=TRUE)
+	gaps_file = read.csv("./data/gaps_cigar.csv", header = TRUE, stringsAsFactors = FALSE)
+	gaps = gaps_file$cigar
 	cigar = gaps %>% str_extract_all(pattern="\\d+\\w") %>% lapply(., function(x) {
     	lens = as.integer(x %>% str_extract_all(pattern="^\\d+"))
     	chars = x %>% str_extract_all(pattern="\\w$")
@@ -95,5 +101,5 @@ if(!interactive()) {
 	p_nucs = c("A"=0.308,"C"=0.185,"G"=0.199,"T"=0.308)
 	nucs = names(p_nucs)
 
-    simulate_two_main(input=ARGS[2], output=ARGS[3])
+    simulate_two_main(input=ARGS[1], output=ARGS[2])
 }

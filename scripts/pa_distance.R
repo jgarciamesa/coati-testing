@@ -3,14 +3,15 @@
 #library(stringr)
 library(seqinr)
 
-pa_distance_main = function(ref,aln_list,metric) {
-  refseq = read.fasta(ref, set.attributes = FALSE, forceDNAtolower = FALSE)
+pa_distance_main = function(filename, aligners, metric) {
+  refseq = read.fasta(paste0("data/ref_alignments/", filename),
+                      set.attributes = FALSE,
+                      forceDNAtolower = FALSE)
   aln = c()
   d = c()
-  for(aln in aln_list) {
-    aln_file = paste0("aln/ref/", aln)
+  for(aln in aligners) {
+    aln_file = paste0("aln/ref/", aln, "/", filename)
     alseq = read.fasta(aln_file,set.attributes = FALSE, forceDNAtolower = FALSE)
-    #alseq = read.fasta(aln, set.attributes = FALSE, forceDNAtolower = FALSE)
 
     h1 = vector("list",2)
     h2 = vector("list",2)
@@ -32,7 +33,7 @@ pa_distance_main = function(ref,aln_list,metric) {
     d[length(d)+1] = 1/c * sum(distance)
   }
   
-  cat(basename(ref[1]),d,sep = ",")
+  return(d)
 }
 
 homo_set = function(al, set, option) {
@@ -79,13 +80,3 @@ homo_set = function(al, set, option) {
 sym_distance = function(h1,h2) {
   return(sum(length(which(h1 != h2)))/2)
 }
-
-if(!interactive()) {
-  ARGS = commandArgs(trailing = TRUE)
-  arg_list = c()
-  for(i in 2:(length(ARGS)-1)) {
-    arg_list[length(arg_list)+1] = ARGS[i]
-  }
-  pa_distance_main(ref = ARGS[1], al = arg_list, metric=ARGS[length(ARGS)])
-}
-

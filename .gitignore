@@ -1,12 +1,14 @@
 # data
-data/*
+data/*.csv
+data/ref_alignments/*.fasta
+data/no_gaps_ref/*.fasta
 !data/.gitkeep
+!data/ref_alignments/.gitkeep
+!data/no_gaps_ref/.gitkeep
 
 # raw-data
 raw_data/*
 !raw_data/gorilla_geneId.tsv
-!raw_data/dmelanogaster_geneId.tsv
-!raw_data/mouse_geneId.tsv
 
 # fasta file
 *.fasta
@@ -15,6 +17,10 @@ raw_data/*
 
 # results folder
 results/*
+!results/.gitkeep
 
 # helper scripts
 scripts/helper/*
+
+# supplementary materials - results summary
+supplementary_materials.pdf

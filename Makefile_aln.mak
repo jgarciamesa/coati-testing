@@ -1,5 +1,5 @@
 ################################################################################
-# coati models vs prank vs mafft alignments                                    #
+# aligner recipes: coati, prank, mafft, clustal omega, macse                   #
 ################################################################################
 
 aln/coati/%: $(RAW_PATH)/%
@@ -8,7 +8,7 @@ aln/coati/%: $(RAW_PATH)/%
 
 aln/mcoati/%: $(RAW_PATH)/%
 	@echo -ne "mcoati align $*\t\t\r"
-	@./bin/coati-alignpair $< -m m-coati -o $@
+	@./bin/coati-alignpair $< -m mar-mg -o $@ 2> /dev/null
 
 aln/dna/%: $(RAW_PATH)/%
 	@echo -ne "dna align $*\t\t\r"
@@ -16,11 +16,11 @@ aln/dna/%: $(RAW_PATH)/%
 
 aln/ecm/%: $(RAW_PATH)/%
 	@echo -ne "ecm align $*\t\t\r"
-	@./bin/coati-alignpair $< -m ecm -o $@
+	@./bin/coati-alignpair $< -m tri-ecm -o $@
 
 aln/mecm/%: $(RAW_PATH)/%
 	@echo -ne "mecm align $*\t\t\r"
-	@./bin/coati-alignpair $< -m m-ecm -o $@
+	@./bin/coati-alignpair $< -m mar-ecm -o $@
 
 aln/prank/%: $(RAW_PATH)/%
 	@echo -ne "prank align $*\t\t\r"
@@ -29,11 +29,11 @@ aln/prank/%: $(RAW_PATH)/%
 
 aln/mafft/%: $(RAW_PATH)/%
 	@echo -ne "mafft align $*\t\t\r"
-	@mafft --quiet --preservecase --globalpair --maxiterate 1000 $< > $@
+	@./bin/mafft --quiet --preservecase --globalpair --maxiterate 1000 $< > $@
 
 aln/clustalo/%: $(RAW_PATH)/%
 	@echo -ne "clustalo align $*\t\t\r"
-	@clustalo --force -i $< -o $@
+	@./bin/clustalo --force -i $< -o $@
 
 aln/macse/%: $(RAW_PATH)/%
 	@echo -ne "macse align $*\t\t\r"
@@ -61,11 +61,11 @@ clean_initial_all:
 
 aln/ref/coati/%: $(REF_PATH)/%
 	@echo -ne "coati align $*\r"
-	@./bin/coati-alignpair $< -m coati -o $@
+	@./bin/coati-alignpair $< -m tri-mg -o $@
 
 aln/ref/mcoati/%: $(REF_PATH)/%
 	@echo -ne "mcoati align $*\r"
-	@./bin/coati-alignpair $< -m m-coati -o $@
+	@./bin/coati-alignpair $< -m mar-mg -o $@
 
 aln/ref/dna/%: $(REF_PATH)/%
 	@echo -ne "dna align $*\r"
@@ -73,11 +73,11 @@ aln/ref/dna/%: $(REF_PATH)/%
 
 aln/ref/ecm/%: $(REF_PATH)/%
 	@echo -ne "ecm align $*\r"
-	@./bin/coati-alignpair $< -m ecm -o $@
+	@./bin/coati-alignpair $< -m tri-ecm -o $@
 
 aln/ref/mecm/%: $(REF_PATH)/%
 	@echo -ne "mecm align $*\r"
-	@./bin/coati-alignpair $< -m m-ecm -o $@
+	@./bin/coati-alignpair $< -m mar-ecm -o $@
 
 aln/ref/prank/%: $(REF_PATH)/%
 	@echo -ne "prank align $*\r"
@@ -99,23 +99,16 @@ aln/ref/macse/%: $(REF_PATH)/%
 	@sed -i 's/!/-/g' $@
 	
 
-#aln/ref/baliphy/%.fasta:
-#	./bin/bali-phy --smodel mg94 --iterations 100 data/$(SPECIES)/trim_ref_ungap/$*.fasta
-#	tac $*-1/C1.P1.fastas | sed '/iterations/Q' | tac > $@
-#	rm -r $*-1
-
 clean_reference_%:
 	rm aln/ref/$*/*
 
 clean_reference_all:
 	rm -f aln/ref/coati/*
 	rm -f aln/ref/mcoati/*
-	rm -f aln/ref/dpmcoati/*
 	rm -f aln/ref/dna/*
 	rm -f aln/ref/ecm/*
 	rm -f aln/ref/mecm/*
 	rm -f aln/ref/prank/*
 	rm -f aln/ref/mafft/*
 	rm -f aln/ref/clustalo/*
-	rm -f aln/ref/baliphy/*
 
