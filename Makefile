@@ -5,8 +5,8 @@ RSCRIPT = Rscript --vanilla
 SHELL = /bin/bash
 
 RAW_PATH = raw_data/
-N ?= 16800
-LEN ?= 7000
+N ?= 16000
+LEN ?= 6000
 
 ################################################################################
 # Download gene ID table from Ensembl (use to update files)                    #
@@ -29,7 +29,7 @@ DOWNLOAD_GENES = $(addprefix $(RAW_PATH)/,$(GENES))
 download_genes: $(DOWNLOAD_GENES)
 
 $(RAW_PATH)/%.fasta: | scripts/get_sequences.R
-	@$(shell $(RSCRIPT) scripts/get_sequences.R raw_data/gorilla_geneId.tsv $* $(@D))
+	@$(RSCRIPT) scripts/get_sequences.R raw_data/gorilla_geneId.tsv $* $(@D)
 	@echo -ne "Downloaded " $* "("$(shell ls ${RAW_PATH}/*.fasta | wc -l)" out of ${N}).\r"
 
 ################################################################################
@@ -63,9 +63,9 @@ initial_alignment: $(INITIAL_ALIGNMENTS)
 MODELS = mcoati prank mafft clustalo macse
 GAPS_FILE = data/gaps.csv
 
-$(GAPS_FILE): scripts/gaps.sh $(INITIAL_ALIGNMENTS)
+$(GAPS_FILE): scripts/gaps.sh
 	@echo "Find alignments with gaps               "
-	@$(shell bash $< ${MODELS})
+	@bash $< ${MODELS}
 
 ################################################################################
 # Create cigar strings with indel types for simulation                         #
@@ -79,7 +79,7 @@ data/gaps_cigar.csv: scripts/gaps2cigar.R $(GAPS_FILE) $(GAPS)
 # extract gap information and encode it using CIGAR strings
 %.gap: scripts/gaps2cigar.R
 	@echo -ne "Encoding gaps from " $* "     \r"
-	@$(shell ${RSCRIPT} $< $* | cut -d '"' -f 2 >> data/gaps_cigar.csv)
+	@${RSCRIPT} $< $* | cut -d '"' -f 2 >> data/gaps_cigar.csv
 
 ################################################################################
 # Create file with un-gaped initial alignments
@@ -101,7 +101,7 @@ reference: $(REF_ALIG) | data/nogaps.csv # data/gaps_cigar.csv
 
 data/ref_alignments/%: scripts/simulate2.R scripts/write_fasta.R
 	@echo -ne "Creating reference alignment $*\r"
-	@$(shell timeout 60s ${RSCRIPT} $< ${RAW_PATH}/$* $@ | cut -d '"' -f 2 >> data/ref_alignments.csv)
+	@timeout 60s ${RSCRIPT} $< ${RAW_PATH}/$* $@ | cut -d '"' -f 2 >> data/ref_alignments.csv
 
 ################################################################################
 # Create reference alignments with no gaps for testing                         #
@@ -139,7 +139,7 @@ results/results_summary.csv: $(RES)
 
 results/%.res: scripts/results_summary.R
 	@echo -ne "summary stats $*\r"
-	$(shell $(RSCRIPT) $< $* ${MODELS})
+	@$(RSCRIPT) $< $* ${MODELS}
 
 supplementary_materials.pdf: supplementary_materials.Rmd
 	@Rscript -e "rmarkdown::render('supplementary_materials.Rmd')"

@@ -49,7 +49,7 @@ dseq_summary = data.frame(coati = mean(coati),
 ################################################################################
 # perfect, best, and imperfect alignments
 source("scripts/number_alignments.R")
-alns = num_alns()
+alns = num_alns("results/results_summary.csv")
 
 # fix row and column names and add to stats table
 row.names(alns)[which(row.names(alns) == "mcoati")] = "coati"

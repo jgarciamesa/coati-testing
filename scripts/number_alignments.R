@@ -1,8 +1,8 @@
 suppressMessages(suppressWarnings(library(dplyr)))
 
 
-num_alns = function() {
-    results_summary = read.csv(file = "results/results_summary.csv", header = TRUE, stringsAsFactors = FALSE)
+num_alns = function(filename) {
+    results_summary = read.csv(file = filename, header = TRUE, stringsAsFactors = FALSE)
 
     # extract dseq values for all aligners per each reference alignment
     split_tibble <- function(tibble, col = 'col') tibble %>% split(., .[, col])
