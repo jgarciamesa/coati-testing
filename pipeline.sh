@@ -37,7 +37,7 @@ tput setaf 15
 # Initial alignment
 tput setaf 11; echo "Initial alignment"
 tput setaf 15
-make initial_alignment N=${n} -j${j} -i
+make initial_alignment N=${n} -j${j} -i &> /dev/null
 tput setaf 11; echo "Initial alignment done                "
 tput setaf 15
 
