@@ -6,7 +6,7 @@ library(TeachingDemos)
 simulate_two_main = function(input, output) {
     seqs = read.fasta(input, set.attributes=FALSE, forceDNAtolower=FALSE)
 
-	char2seed(basename(gsub(".fasta", "", output)))
+	char2seed(basename(gsub("ENSG00000", "", gsub(".fasta", "", output))))
 	cigar_id = sample.int(n = length(cigar), size = 1)
 	cigars = cigar[cigar_id]
 	current_cigar = 1

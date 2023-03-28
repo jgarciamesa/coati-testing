@@ -4,7 +4,7 @@
 
 aln/coati/%: $(RAW_PATH)/%
 	@echo -ne "coati align $*\t\t\r"
-	@./bin/coati-alignpair $< -m coati -o $@
+	@./bin/coati-alignpair $< -m tri-mg -o $@
 
 aln/mcoati/%: $(RAW_PATH)/%
 	@echo -ne "mcoati align $*\t\t\r"

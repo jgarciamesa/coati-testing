@@ -18,7 +18,7 @@ One-tailed Wilcoxon rank test between COATi and alternative aligners.
 results = read.csv("results/results_summary.csv")
 
 # extract dseq values for each aligner
-coati = results$dseq[which(results$aligner == "mcoati")]
+coati = results$dseq[which(results$aligner == "ecm")]
 clustalomega = results$dseq[which(results$aligner == "clustalo")]
 macse = results$dseq[which(results$aligner == "macse")]
 mafft = results$dseq[which(results$aligner == "mafft")]
@@ -49,10 +49,10 @@ dseq_summary = data.frame(coati = mean(coati),
 ################################################################################
 # perfect, best, and imperfect alignments
 source("scripts/number_alignments.R")
-alns = num_alns()
+alns = num_alns("results/results_summary.csv")
 
 # fix row and column names and add to stats table
-row.names(alns)[which(row.names(alns) == "mcoati")] = "coati"
+row.names(alns)[which(row.names(alns) == "ecm")] = "coati"
 colnames(alns) = c("Perfect alignments", "Best alignments", "Imperfect alignments")
 stats_table = rbind(dseq_summary, t(alns))
 
@@ -60,7 +60,7 @@ stats_table = rbind(dseq_summary, t(alns))
 # selection (ka ks)
 source("scripts/kaks.R")
 
-aligners = c("mcoati", "prank", "mafft", "clustalo", "macse")
+aligners = c("ecm", "prank", "mafft", "clustalo", "macse")
 selection = data.frame("F1.pos" = double(),
                        "F1.neg" = double())
 

@@ -6,7 +6,7 @@
 
 # n - number of sequences. Default: 4000.
 #  MAX value: gorilla 16809
-n=16800
+n=16000
 
 # len - max length of sequences. Default: 3500 nucs/seq.
 len=6000

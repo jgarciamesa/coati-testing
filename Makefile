@@ -5,8 +5,8 @@ RSCRIPT = Rscript --vanilla
 SHELL = /bin/bash
 
 RAW_PATH = raw_data/
-N ?= 16800
-LEN ?= 7000
+N ?= 16000
+LEN ?= 6000
 
 ################################################################################
 # Download gene ID table from Ensembl (use to update files)                    #
@@ -51,7 +51,7 @@ FILTERED = $(shell cat data/filtered.csv 2> /dev/null)
 INITIAL_ALIGNMENTS = data/filtered.csv \
 					$(addprefix aln/macse/,$(FILTERED)) \
 					$(addprefix aln/mafft/,$(FILTERED)) \
-					$(addprefix aln/mcoati/,$(FILTERED)) \
+					$(addprefix aln/ecm/,$(FILTERED)) \
 					$(addprefix aln/clustalo/,$(FILTERED)) \
 					$(addprefix aln/prank/,$(FILTERED))
 
@@ -60,10 +60,10 @@ initial_alignment: $(INITIAL_ALIGNMENTS)
 ################################################################################
 # Identify which initial alignments have gaps                                  #
 ################################################################################
-MODELS = mcoati prank mafft clustalo macse
+MODELS = ecm prank mafft clustalo macse
 GAPS_FILE = data/gaps.csv
 
-$(GAPS_FILE): scripts/gaps.sh $(INITIAL_ALIGNMENTS)
+$(GAPS_FILE): scripts/gaps.sh
 	@echo "Find alignments with gaps               "
 	@$(shell bash $< ${MODELS})
 
@@ -120,7 +120,7 @@ ALN = $(shell ls $(REF_PATH)/ )
 ALIGN_REFERENCE = no_gaps_reference \
 				$(addprefix aln/ref/macse/,$(ALN)) \
 				$(addprefix aln/ref/mafft/,$(ALN)) \
- 				$(addprefix aln/ref/mcoati/,$(ALN)) \
+				$(addprefix aln/ref/ecm/,$(ALN)) \
 				$(addprefix aln/ref/clustalo/,$(ALN))\
 				$(addprefix aln/ref/prank/,$(ALN))
 
