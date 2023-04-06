@@ -86,11 +86,11 @@ aln/ref/prank/%: $(REF_PATH)/%
 
 aln/ref/mafft/%: $(REF_PATH)/%
 	@echo -ne "mafft align $*\r"
-	@mafft --quiet --preservecase --globalpair --maxiterate 1000 $< > $@
+	@./bin/mafft --quiet --preservecase --globalpair --maxiterate 1000 $< > $@
 
 aln/ref/clustalo/%: $(REF_PATH)/%
 	@echo -ne "clustalo align $*\r"
-	@clustalo -i $< -o $@
+	@./bin/clustalo -i $< -o $@
 
 aln/ref/macse/%: $(REF_PATH)/%
 	@echo -ne "macse align $*\r"
