@@ -6,7 +6,7 @@ OUTPUT=$3
 
 rm -f ${OUTPUT}
 
-for file in $(ls raw_data/${SPECIES}/*.fasta | head -n${N} )
+for file in $(ls raw_data/*.fasta | head -n${N} )
 do
 	s=$(stat --printf="%s" ${file})
 	if [ ${s} -le ${SIZE} ]

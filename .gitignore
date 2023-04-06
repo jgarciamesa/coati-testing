@@ -2,6 +2,7 @@
 data/*.csv
 data/ref_alignments/*.fasta
 data/no_gaps_ref/*.fasta
+data/cigar.rda
 !data/.gitkeep
 !data/ref_alignments/.gitkeep
 !data/no_gaps_ref/.gitkeep
@@ -24,3 +25,6 @@ scripts/helper/*
 
 # supplementary materials - results summary
 supplementary_materials.pdf
+
+# PDF files
+*.pdf

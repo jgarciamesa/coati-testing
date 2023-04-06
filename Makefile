@@ -7,6 +7,7 @@ SHELL = /bin/bash
 RAW_PATH = raw_data/
 N ?= 16000
 LEN ?= 6000
+COATI_MODEL ?= tri-mg
 
 ################################################################################
 # Download gene ID table from Ensembl (use to update files)                    #
@@ -51,7 +52,7 @@ FILTERED = $(shell cat data/filtered.csv 2> /dev/null)
 INITIAL_ALIGNMENTS = data/filtered.csv \
 					$(addprefix aln/macse/,$(FILTERED)) \
 					$(addprefix aln/mafft/,$(FILTERED)) \
-					$(addprefix aln/mcoati/,$(FILTERED)) \
+					$(addprefix aln/$(COATI_MODEL)/,$(FILTERED)) \
 					$(addprefix aln/clustalo/,$(FILTERED)) \
 					$(addprefix aln/prank/,$(FILTERED))
 
@@ -60,7 +61,7 @@ initial_alignment: $(INITIAL_ALIGNMENTS)
 ################################################################################
 # Identify which initial alignments have gaps                                  #
 ################################################################################
-MODELS = mcoati prank mafft clustalo macse
+MODELS = $(COATI_MODEL) prank mafft clustalo macse
 GAPS_FILE = data/gaps.csv
 
 $(GAPS_FILE): scripts/gaps.sh
@@ -99,16 +100,19 @@ reference: $(REF_ALIG) | data/nogaps.csv # data/gaps_cigar.csv
 	@echo "Done creating reference alignments                   "
 	@sed -i '1 i\raw_name,cigar,origin,ref_name' data/ref_alignments.csv
 
-data/ref_alignments/%: scripts/simulate2.R scripts/write_fasta.R
+data/ref_alignments/%: scripts/simulate2.R data/cigar.rda scripts/write_fasta.R
 	@echo -ne "Creating reference alignment $*\r"
-	@timeout 60s ${RSCRIPT} $< ${RAW_PATH}/$* $@ | cut -d '"' -f 2 >> data/ref_alignments.csv
+	@timeout 20s ${RSCRIPT} $< ${RAW_PATH}/$* $@ | cut -d '"' -f 2 >> data/ref_alignments.csv
+
+data/cigar.rda: scripts/create_cigar_list.R
+	@${RSCRIPT} $<
 
 ################################################################################
 # Create reference alignments with no gaps for testing                         #
 ################################################################################
 
 .PHONY: no_gaps_reference
-no_gaps_reference: $(REF_ALIG) data/nogaps.csv# data/gaps_cigar.csv
+no_gaps_reference: data/nogaps.csv# data/gaps_cigar.csv
 	@bash scripts/rem_gaps_ref.sh
 
 ################################################################################
@@ -120,7 +124,7 @@ ALN = $(shell ls $(REF_PATH)/ )
 ALIGN_REFERENCE = no_gaps_reference \
 				$(addprefix aln/ref/macse/,$(ALN)) \
 				$(addprefix aln/ref/mafft/,$(ALN)) \
- 				$(addprefix aln/ref/mcoati/,$(ALN)) \
+				$(addprefix aln/ref/$(COATI_MODEL)/,$(ALN)) \
 				$(addprefix aln/ref/clustalo/,$(ALN))\
 				$(addprefix aln/ref/prank/,$(ALN))
 
@@ -155,8 +159,9 @@ clean_pipeline:
 	rm -f data/no_gaps_ref/*.fasta
 	rm -f data/ref_alignments/*.fasta
 	rm -f data/ref_alignments.csv
-	rm -f aln/{coati,mcoati,dna,ecm,mecm,prank,mafft,clustalo,macse}/*.fasta
-	rm -f aln/ref/{coati,mcoati,dna,ecm,mecm,prank,mafft,clustalo,macse}/*.fasta
+	rm -f data/cigar.rda
+	rm -f aln/{tri-mg,mar-mg,dna,tri-ecm,mar-ecm,prank,mafft,clustalo,macse}/*.fasta
+	rm -f aln/ref/{tri-mg,mar-mg,dna,tri-ecm,mar-ecm,prank,mafft,clustalo,macse}/*.fasta
 	rm -f results/results_summary.csv
 
 include Makefile_aln.mak

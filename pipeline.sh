@@ -37,7 +37,7 @@ tput setaf 15
 # Initial alignment
 tput setaf 11; echo "Initial alignment"
 tput setaf 15
-make initial_alignment N=${n} -j${j} -i &> /dev/null
+make initial_alignment N=${n} -j${j} -i
 tput setaf 11; echo "Initial alignment done                "
 tput setaf 15
 
@@ -75,5 +75,5 @@ make align_ref N=${n} -j${j} -i
 # compute statistics
 tput setaf 11; echo "Compute summary statistics           "
 tput setaf 15
-make results/results_summary.csv
+make results/results_summary.csv -i -j${j}
 make supplementary_materials.pdf
