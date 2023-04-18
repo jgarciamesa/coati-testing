@@ -138,15 +138,18 @@ ALL_ALNS = $(shell ls data/ref_alignments/)
 RES = $(addprefix results/, $(addsuffix .res, $(ALL_ALNS)))
 
 results/results_summary.csv: $(RES)
-	@sed -i '1 i\ref_name,raw_name,cigar,origin,aligner,dseq,ref_omega,aln_omega' $@
+	@sed -i '1 i\ref_name,raw_name,cigar,origin,aligner,dseq,dpos,ref_omega,aln_omega' $@
 	@echo -ne "Built $@   \n"
 
 results/%.res: scripts/results_summary.R
 	@echo -ne "summary stats $*\r"
 	@$(RSCRIPT) $< $* ${MODELS}
 
-supplementary_materials.pdf: supplementary_materials.Rmd
-	@Rscript -e "rmarkdown::render('supplementary_materials.Rmd')"
+supplementary_materials_dseq.pdf: supplementary_materials_dseq.Rmd
+	@Rscript -e "rmarkdown::render('supplementary_materials_dseq.Rmd')"
+
+supplementary_materials_dpos.pdf: supplementary_materials_dpos.Rmd
+	@Rscript -e "rmarkdown::render('supplementary_materials_dpos.Rmd')"
 
 ################################################################################
 # Clean pipeline results except gene id list and raw fasta downloads		   #

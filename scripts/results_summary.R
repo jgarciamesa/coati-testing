@@ -1,6 +1,6 @@
 
 
-source("scripts/pa_distance.R")
+source("scripts/distance.R")
 source("scripts/kaks.R")
 
 main = function(aln, aligners) {
@@ -9,8 +9,9 @@ main = function(aln, aligners) {
     len = length(aligners)
 
     ############################################################################
-    # calculate dseq for inferred alignments
-    dseqs = pa_distance_main(aln, aligners, 1)  # 1: dseq
+    # calculate dseq & dpos for inferred alignments
+    dseqs = distance(aln, aligners, "dseq")
+    dposs = distance(aln, aligners, "dpos")
     
     ############################################################################
     # calculate selection for reference and inferred alignments 
@@ -28,6 +29,7 @@ main = function(aln, aligners) {
     distance_selection_df = data.frame(ref_name = rep(aln, len),
                             aligner = aligners,
                             dseq = dseqs,
+                            dpos = dposs,
                             ref_omega = rep(ref_omega, len),
                             aln_omega = models_omega)
 

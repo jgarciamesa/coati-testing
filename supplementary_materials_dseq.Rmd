@@ -1,0 +1,109 @@
+---
+title: "Supplementary Materials"
+author: "Juan J. García Mesa"
+#date: "`r Sys.Date()`"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Accuracy at inferring simulated alignments ($d_{seq}$)
+
+One-tailed Wilcoxon rank test between COATi and alternative aligners.
+
+```{r include = FALSE}
+# coati's model being run
+coati_model = "mar-mg"
+
+# read results_summary data
+results = read.csv("results/results_summary.csv")
+
+# extract dseq values for each aligner
+coati = results$dseq[which(results$aligner == coati_model)]
+clustalomega = results$dseq[which(results$aligner == "clustalo")]
+macse = results$dseq[which(results$aligner == "macse")]
+mafft = results$dseq[which(results$aligner == "mafft")]
+prank = results$dseq[which(results$aligner == "prank")]
+```
+
+```{r}
+# one-side wilcoxon rank test
+wilcox.test(coati, clustalomega)
+wilcox.test(coati, macse)
+wilcox.test(coati, mafft)
+wilcox.test(coati, prank)
+```
+
+\newpage
+
+## Summary statistics
+
+```{r echo = FALSE}
+library(knitr)
+
+dseq_summary = data.frame(coati = mean(coati),
+                  prank = mean(prank),
+                  mafft = mean(mafft),
+                  clustalo = mean(clustalomega),
+                  macse = mean(macse), row.names = "$d_{seq}$")
+
+################################################################################
+# perfect, best, and imperfect alignments
+source("scripts/number_alignments.R")
+alns = num_alns("results/results_summary.csv")
+
+# fix row and column names and add to stats table
+row.names(alns)[which(row.names(alns) == coati_model)] = "coati"
+colnames(alns) = c("Perfect alignments", "Best alignments", "Imperfect alignments")
+stats_table = rbind(dseq_summary, t(alns))
+
+################################################################################
+# selection (ka ks)
+source("scripts/kaks.R")
+
+aligners = c(coati_model, "prank", "mafft", "clustalo", "macse")
+selection = data.frame("F1.pos" = double(),
+                       "F1.neg" = double())
+
+# calculate F1 score for positive and negative selection for each aligner
+for(model in aligners) {
+    model_rows = results[which(results$aligner == model), ]
+    pos = ps_accuracy(model_rows$ref_omega, model_rows$aln_omega)
+    neg = ns_accuracy(model_rows$ref_omega, model_rows$aln_omega)
+    
+    selection[nrow(selection) + 1, ] = c(pos, neg)
+}
+
+# fix row and column names and add to stats table
+colnames(selection) = c("F1-score pos selection", "F1-score neg selection")
+rownames(selection) = c("coati", "prank", "mafft", "clustalo", "macse")
+stats_table = rbind(stats_table, t(selection))
+
+# nicely display stats table
+kable(stats_table, digits = 6)
+
+```
+
+## Additional information
+
+```{r echo = FALSE}
+library(knitr)
+suppressWarnings(library(dplyr))
+
+# count number of gap patterns used by each aligner
+dataset = distinct(results, ref_name, .keep_all = TRUE)
+
+# number of gaps per aligners used to generate the true data set
+origin_ref = data.frame(coati = length(which(dataset$origin == coati_model)),
+                  prank = length(which(dataset$origin == "prank")),
+                  mafft = length(which(dataset$origin == "mafft")),
+                  clustalo = length(which(dataset$origin == "clustalo")),
+                  macse = length(which(dataset$origin == "macse")), row.names = c("Number of gap patterns in true data set"))
+kable(origin_ref)
+```
+
+```{r echo=FALSE, results='asis'}
+cat(paste("COATi used the", coati_model, "model."))
+```
