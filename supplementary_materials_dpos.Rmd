@@ -15,7 +15,7 @@ One-tailed Wilcoxon rank test between COATi and alternative aligners.
 
 ```{r include = FALSE}
 # coati's model being run
-coati_model = "mar-mg"
+coati_model = "tri-mg"
 
 # read results_summary data
 results = read.csv("results/results_summary.csv")
