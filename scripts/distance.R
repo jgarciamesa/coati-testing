@@ -18,9 +18,13 @@ distance = function(filename, aligners, metric) {
     for(aln in aligners) {
         aln = paste0("aln/ref/", aln, "/", filename)
         # call metal to calculate distance
-        d = system(paste("bin/metal", flag, ref, aln), intern = TRUE)
+        d = suppressWarnings(system(paste("bin/metal", flag, ref, aln), intern = TRUE, ignore.stderr = TRUE))
         # parse metal output ("fraction = double" --> double)
-        d = as.double(gsub("^.*?=\ ", "", d))
+        if(length(d) <= 0) {
+            d = NA
+        } else {
+            d = as.double(gsub("^.*?=\ ", "", d))
+        }
         distances = append(distances, d)
     }
     
