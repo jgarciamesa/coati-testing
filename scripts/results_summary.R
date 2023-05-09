@@ -14,9 +14,6 @@ main = function(aln, aligners) {
     dposs = distance(aln, aligners, "dpos")
     
     ############################################################################
-    # calculate selection for reference and inferred alignments 
-    selection = vector(mode = "double", length = len)
-
     # omega for reference aln
     ref = process_aln(paste0("data/ref_alignments/"), aln)
     ref_omega = sapply(ref,omega)
@@ -25,13 +22,25 @@ main = function(aln, aligners) {
     models = sapply(aligners, function(x) {process_aln(paste0("aln/ref/",x), aln)})
     models_omega = sapply(models,omega)
     
+    # score alignments
+    scores = c()
+    for(aligner in aligners) {
+        s = suppressWarnings(system(paste0("bin/coati-alignpair -s aln/ref/", aligner, "/", aln), intern = TRUE, ignore.stderr = TRUE))
+        scores = c(scores, as.double(s))
+    }
+
+    if(length(scores) != len) {
+        scores = rep(NA, len)
+    }
+
     # group distance (dseq) and selection (omega) results
     distance_selection_df = data.frame(ref_name = rep(aln, len),
                             aligner = aligners,
                             dseq = dseqs,
                             dpos = dposs,
                             ref_omega = rep(ref_omega, len),
-                            aln_omega = models_omega)
+                            aln_omega = models_omega,
+                            score = scores)
 
     # merge results metrics with gap origin information
     results = merge(reference_df, distance_selection_df, by = "ref_name")
