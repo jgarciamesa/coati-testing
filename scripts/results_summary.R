@@ -33,6 +33,11 @@ main = function(aln, aligners) {
         scores = rep(NA, len)
     }
 
+    r_score = as.double(suppressWarnings(system(paste0("bin/coati-alignpair -s data/ref_alignments/", aln), intern = TRUE, ignore.stderr = TRUE)))
+    if(length(r_score) == 0) {
+        r_score = NA
+    }
+                                                #, intern = TRUE, ignore.stderr = TRUE)))
     # group distance (dseq) and selection (omega) results
     distance_selection_df = data.frame(ref_name = rep(aln, len),
                             aligner = aligners,
@@ -40,6 +45,7 @@ main = function(aln, aligners) {
                             dpos = dposs,
                             ref_omega = rep(ref_omega, len),
                             aln_omega = models_omega,
+                            ref_score = rep(r_score, len),
                             score = scores)
 
     # merge results metrics with gap origin information
