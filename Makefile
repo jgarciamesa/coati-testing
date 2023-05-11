@@ -138,7 +138,7 @@ ALL_ALNS = $(shell ls data/ref_alignments/)
 RES = $(addprefix results/, $(addsuffix .res, $(ALL_ALNS)))
 
 results/results_summary.csv: $(RES)
-	@sed -i '1 i\ref_name,raw_name,cigar,origin,aligner,dseq,dpos,ref_omega,aln_omega' $@
+	@sed -i '1 i\ref_name,raw_name,cigar,origin,aligner,dseq,dpos,ref_omega,aln_omega,ref_score,score' $@
 	@echo -ne "Built $@   \n"
 
 results/%.res: scripts/results_summary.R

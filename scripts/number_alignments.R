@@ -8,6 +8,7 @@ num_alns = function(filename) {
     split_tibble <- function(tibble, col = 'col') tibble %>% split(., .[, col])
     split_results = split_tibble(results_summary, 'ref_name')
     dseq = t(sapply(split_results, function(x){ return(x$dseq)}))
+    score = t(sapply(split_results, function(x){ return(x$score)}))
 
     col_s = ncol(dseq)
     row_s = nrow(dseq)
@@ -17,10 +18,15 @@ num_alns = function(filename) {
                          "imperfect" = integer(col_s))
 
     # perfect alignments (dseq = 0)
-    if(col_s == 2) {
-        results$perfect = length(which(dseq[,2] == 0))
-    } else{
-        results$perfect = apply(dseq[,],2,function(x){length(which(x == 0))})
+    for(i in 1:row_s) {
+        z = which(dseq[i, ] == 0)
+        if(length(z) > 0){
+            results$perfect[z] = results$perfect[z] + 1
+            p = intersect(which(dseq[i, ] != 0) ,which(score[i, ] == score[i, z[1]]))
+            if(length(p) > 0) {
+                results$perfect[p] = results$perfect[p] + 1
+            }
+        }
     }
 
     # best alignments (lower d_seq)
