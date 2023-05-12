@@ -21,5 +21,3 @@ A detailed summary of this pipeline:
 in retrieving the data set of true alignments.
 
 A detailed log of the results is saved in `results/results_summary.csv`.
-Upon successful completion, `supplementary_materials.pdf` contains a brief summary
-of the results and different metrics.

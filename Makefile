@@ -145,12 +145,6 @@ results/%.res: scripts/results_summary.R
 	@echo -ne "summary stats $*\r"
 	@$(RSCRIPT) $< $* ${MODELS}
 
-supplementary_materials_dseq.pdf: supplementary_materials_dseq.Rmd
-	@Rscript -e "rmarkdown::render('supplementary_materials_dseq.Rmd')"
-
-supplementary_materials_dpos.pdf: supplementary_materials_dpos.Rmd
-	@Rscript -e "rmarkdown::render('supplementary_materials_dpos.Rmd')"
-
 ################################################################################
 # Clean pipeline results except gene id list and raw fasta downloads		   #
 ################################################################################
