@@ -21,3 +21,5 @@ A detailed summary of this pipeline:
 in retrieving the data set of true alignments.
 
 A detailed log of the results is saved in `results/results_summary.csv`.
+
+This pipeline is used in "COATi: statistical pairwise alignment of protein coding sequences" and the supplementary data can be found [here](https://figshare.com/articles/dataset/Supplementary_data_for_COATi_statistical_pairwise_alignment_of_protein_coding_sequences_/23064227).
