@@ -2,40 +2,40 @@
 # aligner recipes: coati, prank, mafft, clustal omega, macse                   #
 ################################################################################
 
-aln/tri-mg/%: $(RAW_PATH)/%
+aln/tri-mg/%: $(CDS_PATH)/%
 	@echo -ne "coati tri-mg align $*\t\t\r"
 	@./bin/coati-alignpair $< -m tri-mg -o $@
 
-aln/mar-mg/%: $(RAW_PATH)/%
+aln/mar-mg/%: $(CDS_PATH)/%
 	@echo -ne "mcoati ar-mg align $*\t\t\r"
 	@./bin/coati-alignpair $< -m mar-mg -o $@ 2> /dev/null
 
-aln/dna/%: $(RAW_PATH)/%
+aln/dna/%: $(CDS_PATH)/%
 	@echo -ne "coati dna align $*\t\t\r"
 	@./bin/coati-alignpair $< -m dna -o $@
 
-aln/tri-ecm/%: $(RAW_PATH)/%
+aln/tri-ecm/%: $(CDS_PATH)/%
 	@echo -ne "coati tri-ecm align $*\t\t\r"
 	@./bin/coati-alignpair $< -m tri-ecm -o $@
 
-aln/mar-ecm/%: $(RAW_PATH)/%
+aln/mar-ecm/%: $(CDS_PATH)/%
 	@echo -ne "coati mar-ecm align $*\t\t\r"
 	@./bin/coati-alignpair $< -m mar-ecm -o $@
 
-aln/prank/%: $(RAW_PATH)/%
+aln/prank/%: $(CDS_PATH)/%
 	@echo -ne "prank align $*\t\t\r"
 	@./bin/prank -codon -d="$<" -o=$@ -quiet &>/dev/null
 	@if [ -f $@.best.fas ]; then mv $@.best.fas $@; else touch $@; fi
 
-aln/mafft/%: $(RAW_PATH)/%
+aln/mafft/%: $(CDS_PATH)/%
 	@echo -ne "mafft align $*\t\t\r"
 	@./bin/mafft --quiet --preservecase --globalpair --maxiterate 1000 $< > $@
 
-aln/clustalo/%: $(RAW_PATH)/%
+aln/clustalo/%: $(CDS_PATH)/%
 	@echo -ne "clustalo align $*\t\t\r"
 	@./bin/clustalo --force -i $< -o $@
 
-aln/macse/%: $(RAW_PATH)/%
+aln/macse/%: $(CDS_PATH)/%
 	@echo -ne "macse align $*\t\t\r"
 	@java -jar ./bin/macse_v2.06.jar -fs_lr 10 -stop_lr 10 -prog alignSequences -seq $< -out_NT $@ -out_AA output_AA_$* &>/dev/null
 	@rm output_AA_$*
@@ -110,5 +110,6 @@ clean_reference_all:
 	rm -f aln/ref/mecm/*
 	rm -f aln/ref/prank/*
 	rm -f aln/ref/mafft/*
+	rm -f aln/ref/macse/*
 	rm -f aln/ref/clustalo/*
 

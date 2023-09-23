@@ -5,6 +5,7 @@ RSCRIPT = Rscript --vanilla
 SHELL = /bin/bash
 
 RAW_PATH = raw_data/
+CDS_PATH = data/cds/
 N ?= 16000
 LEN ?= 6000
 COATI_MODEL ?= tri-mg
@@ -40,8 +41,8 @@ $(RAW_PATH)/%.fasta: | scripts/get_sequences.R
 .PHONY: filter
 filter: data/filtered.csv
 
-data/filtered.csv: $(DOWNLOAD_GENES) scripts/filter_seqs.sh
-	@bash scripts/filter_seqs.sh $(N) $(LEN) $@
+data/filtered.csv: $(DOWNLOAD_GENES) scripts/filter_and_reverse.R
+	@$(RSCRIPT) scripts/filter_and_reverse.R $(N) $(LEN) $@
 
 ################################################################################
 # Initial alignments with all methods (aln recipes in Makefile_aln.mak)        #
@@ -102,7 +103,7 @@ reference: $(REF_ALIG) | data/nogaps.csv # data/gaps_cigar.csv
 
 data/ref_alignments/%: scripts/simulate2.R data/cigar.rda scripts/write_fasta.R
 	@echo -ne "Creating reference alignment $*\r"
-	@timeout 20s ${RSCRIPT} $< ${RAW_PATH}/$* $@ | cut -d '"' -f 2 >> data/ref_alignments.csv
+	@timeout 20s ${RSCRIPT} $< ${CDS_PATH}/$* $@ | cut -d '"' -f 2 >> data/ref_alignments.csv
 
 data/cigar.rda: scripts/create_cigar_list.R
 	@${RSCRIPT} $<
