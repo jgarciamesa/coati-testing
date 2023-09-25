@@ -30,6 +30,15 @@ filter_seqs <- function(N, max_len, outfile) {
         if(any(c("TAA", "TAG", "TGA") %in% codons[-length(codons)])) {
             next
         }
+
+        # check for ambiguous nucs on gorilla sequence
+        gor_nucs = sort(unique(unlist(strsplit(fasta$seq[2], split = ""))))
+        if(length(gor_nucs) != 4) {
+            next
+        } else if(!all.equal(gor_nucs, c("A", "C", "G", "T"))) {
+            next
+        }
+
         # save name of CDS
         filtered = c(filtered, basename(file))
         
