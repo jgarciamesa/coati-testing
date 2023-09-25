@@ -5,6 +5,8 @@
 library(seqinr)
 
 filter_seqs <- function(N, max_len, outfile) {
+    N = as.integer(N)
+    max_len = as.integer(max_len)
     CDS <- list.files("raw_data/", pattern = "*.fasta", full.names = TRUE)[1:N]
     filtered = c()
 
