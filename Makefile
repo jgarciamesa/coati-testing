@@ -4,6 +4,9 @@
 RSCRIPT = Rscript --vanilla
 SHELL = /bin/bash -e -o pipefail
 
+# GENE_IDS variable
+include raw_fasta/gene_id_list.mk
+
 ################################################################################
 # STEP 1: Download empirical CDS sequences and create unaligned fasta files    #
 ################################################################################
@@ -33,8 +36,14 @@ raw_fasta/.script_done: scripts/write_raw_fasta.R raw_fasta/hs-gg_gene_pairs.csv
 		raw_fasta
 	touch $@
 
+raw_fasta/gene_id_list.mk: raw_fasta/hs-gg_gene_pairs.csv.gz
+	echo "GENE_IDS = \\" > $@
+	zcat $< | awk -F, 'NR > 1 { print "   " $$1 ", \\" }' >> $@
+	echo "" >> $@
+
 results/raw_fasta_metrics.csv: scripts/create_raw_fasta_metrics.R raw_fasta/.script_done
 	$(RSCRIPT) scripts/create_raw_fasta_metrics.R raw_fasta $@
+
 
 raw_fasta: raw_fasta/.script_done results/raw_fasta_metrics.csv
 
@@ -45,8 +54,24 @@ raw_fasta: raw_fasta/.script_done results/raw_fasta_metrics.csv
 # STEP 2: Align empirical CDS sequences                                        #
 ################################################################################
 
+COATI_BIN = ./bin/coati-alignpair
+PRANK_BIN = ./bin/prank
+MAFFT_BIN = ./bin/mafft
 
+raw_fasta_aligned/coati-tri-mg/%.coati-tri-mg.fasta: raw_fasta/%.fasta
+	$(COATI_BIN) $< -m tri-mg -o $@
 
+raw_fasta_aligned/coati-tri-mg: $(addprefix raw_fasta_aligned/coati-tri-mg/, $(addsuffix .coati-tri-mg.fasta, GENE_IDS))
+
+.PHONY: raw_fasta_aligned/coati-tri-mg
+
+raw_fasta_aligned/prank/%.prank.fasta: raw_fasta/%.fasta
+	$(PRANK_BIN) -codon -d="$<" -o=$@ -quiet &>/dev/null
+	if [ -f $@.best.fas ]; then mv $@.best.fas $@; else touch $@; fi
+
+raw_fasta_aligned/prank: $(addprefix raw_fasta_aligned/prank/, $(addsuffix .prank.fasta, GENE_IDS))
+
+.PHONY: raw_fasta_aligned/prank
 
 ################################################################################
 # Initial alignments with all methods (aln recipes in Makefile_aln.mak)        #
