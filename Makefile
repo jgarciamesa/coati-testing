@@ -2,46 +2,51 @@
 # Global variables                                                             #
 ################################################################################
 RSCRIPT = Rscript --vanilla
-SHELL = /bin/bash
-
-RAW_PATH = raw_data/
-N ?= 16000
-LEN ?= 6000
-COATI_MODEL ?= tri-mg
+SHELL = /bin/bash -e -o pipefail
 
 ################################################################################
-# Download gene ID table from Ensembl (use to update files)                    #
+# STEP 1: Download empirical CDS sequences and create unaligned fasta files    #
 ################################################################################
 
-.PHONY: download_geneid
-download_geneid: | raw_data/gorilla_geneId.tsv
+# Download CDS sequences for every human-gorilla orthologous gene pair where
+#   - Both genes are on autosomes and encode proteins
+#   - The human sequence has a CCDS annotation
+#   - There are one-to-one orthologs
+#   - Use the canonical isoforms for both species
+#   - Total nucleotide length of both isoforms is <= 6000
 
-raw_data/gorilla_geneId.tsv: scripts/get_geneId.R
-	@echo "Downloading" $* "gene IDs"
-	@$(RSCRIPT) $< $* $@
+raw_fasta/hs-gg_gene_pairs.csv.gz: scripts/create_gene_table.R
+	@echo "Downloading gene ids from ENSEMBL..."
+	$(RSCRIPT) scripts/create_gene_table.R $@
+
+raw_fasta/Homo_sapiens.GRCh38.cds.all.fa.gz:
+	curl https://ftp.ensembl.org/pub/release-110/fasta/homo_sapiens/cds/Homo_sapiens.GRCh38.cds.all.fa.gz > $@
+
+raw_fasta/Gorilla_gorilla.gorGor4.cds.all.fa.gz:
+	curl https://ftp.ensembl.org/pub/release-110/fasta/gorilla_gorilla/cds/Gorilla_gorilla.gorGor4.cds.all.fa.gz > $@
+
+raw_fasta/.script_done: scripts/write_raw_fasta.R raw_fasta/hs-gg_gene_pairs.csv.gz \
+	raw_fasta/Homo_sapiens.GRCh38.cds.all.fa.gz raw_fasta/Gorilla_gorilla.gorGor4.cds.all.fa.gz
+	@echo "Creating unaligned FASTA files for every gene...."	
+	$(RSCRIPT) scripts/write_raw_fasta.R raw_fasta/hs-gg_gene_pairs.csv.gz \
+		raw_fasta/Homo_sapiens.GRCh38.cds.all.fa.gz raw_fasta/Gorilla_gorilla.gorGor4.cds.all.fa.gz \
+		raw_fasta
+	touch $@
+
+results/raw_fasta_metrics.csv: scripts/create_raw_fasta_metrics.R raw_fasta/.script_done
+	$(RSCRIPT) scripts/create_raw_fasta_metrics.R raw_fasta $@
+
+raw_fasta: raw_fasta/.script_done results/raw_fasta_metrics.csv
+
+.PHONY: raw_fasta
+
 
 ################################################################################
-# Download first N sequences from ENSEMBL                                      #
-################################################################################
-GENES = $(addsuffix .fasta,$(shell head -n${N} ${RAW_PATH}/gorilla_geneId.tsv | cut -f1))
-DOWNLOAD_GENES = $(addprefix $(RAW_PATH)/,$(GENES))
-
-.PHONY: download_genes
-download_genes: $(DOWNLOAD_GENES)
-
-$(RAW_PATH)/%.fasta: | scripts/get_sequences.R
-	@$(RSCRIPT) scripts/get_sequences.R raw_data/gorilla_geneId.tsv $* $(@D)
-	@echo -ne "Downloaded " $* "("$(shell ls ${RAW_PATH}/*.fasta | wc -l)" out of ${N}).\r"
-
-################################################################################
-# Filter sequences by length												   #
+# STEP 2: Align empirical CDS sequences                                        #
 ################################################################################
 
-.PHONY: filter
-filter: data/filtered.csv
 
-data/filtered.csv: $(DOWNLOAD_GENES) scripts/filter_seqs.sh
-	@bash scripts/filter_seqs.sh $(N) $(LEN) $@
+
 
 ################################################################################
 # Initial alignments with all methods (aln recipes in Makefile_aln.mak)        #

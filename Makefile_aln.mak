@@ -7,7 +7,7 @@ aln/tri-mg/%: $(RAW_PATH)/%
 	@./bin/coati-alignpair $< -m tri-mg -o $@
 
 aln/mar-mg/%: $(RAW_PATH)/%
-	@echo -ne "mcoati ar-mg align $*\t\t\r"
+	@echo -ne "coati mar-mg align $*\t\t\r"
 	@./bin/coati-alignpair $< -m mar-mg -o $@ 2> /dev/null
 
 aln/dna/%: $(RAW_PATH)/%
