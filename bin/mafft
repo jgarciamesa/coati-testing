@@ -5,6 +5,9 @@ version="v7.520 (2023/Mar/22)"; export version
 LANG=C; export LANG
 os=`uname`
 progname=`basename "$0"`
+
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+
 windows="no"
 if [ `echo $os | grep -i cygwin` ]; then
 	os="cygwin"
@@ -36,7 +39,7 @@ fi
 if [ "$MAFFT_BINARIES" ]; then
 	prefix="$MAFFT_BINARIES"
 else
-	prefix="$0-libexec"
+	prefix="${SCRIPT_DIR}/mafft-libexec"
 fi
 export prefix # iranai
 

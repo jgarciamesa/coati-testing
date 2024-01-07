@@ -7,6 +7,8 @@ SHELL = /bin/bash -e -o pipefail
 # GENE_IDS variable
 include raw_fasta/gene_id_list.mk
 
+.DELETE_ON_ERROR:
+
 ################################################################################
 # STEP 1: Download empirical CDS sequences and create unaligned fasta files    #
 ################################################################################
@@ -57,6 +59,14 @@ raw_fasta: raw_fasta/.script_done results/raw_fasta_metrics.csv
 COATI_BIN = ./bin/coati-alignpair
 PRANK_BIN = ./bin/prank
 MAFFT_BIN = ./bin/mafft
+CLUSTALO_BIN = ./bin/clustalo
+MACSE_JAR = ./bin/macse_v2.06.jar
+
+step/2_empirical_alignments:
+
+.PHONY: step/2_empirical_alignments
+
+## COATI #######################################################################
 
 raw_fasta_aligned/coati-tri-mg/%.coati-tri-mg.fasta: raw_fasta/%.fasta
 	$(COATI_BIN) $< -m tri-mg -o $@
@@ -64,6 +74,54 @@ raw_fasta_aligned/coati-tri-mg/%.coati-tri-mg.fasta: raw_fasta/%.fasta
 raw_fasta_aligned/coati-tri-mg: $(addprefix raw_fasta_aligned/coati-tri-mg/, $(addsuffix .coati-tri-mg.fasta, GENE_IDS))
 
 .PHONY: raw_fasta_aligned/coati-tri-mg
+
+step/2_empirical_alignments: raw_fasta_aligned/coati-tri-mg
+
+##
+
+raw_fasta_aligned/coati-tri-ecm/%.coati-tri-ecm.fasta: raw_fasta/%.fasta
+	$(COATI_BIN) $< -m tri-ecm -o $@
+
+raw_fasta_aligned/coati-tri-ecm: $(addprefix raw_fasta_aligned/coati-tri-ecm/, $(addsuffix .coati-tri-ecm.fasta, GENE_IDS))
+
+.PHONY: raw_fasta_aligned/coati-tri-ecm
+
+step/2_empirical_alignments: raw_fasta_aligned/coati-tri-ecm
+
+##
+
+raw_fasta_aligned/coati-mar-mg/%.coati-mar-mg.fasta: raw_fasta/%.fasta
+	$(COATI_BIN) $< -m mar-mg -o $@
+
+raw_fasta_aligned/coati-mar-mg: $(addprefix raw_fasta_aligned/coati-mar-mg/, $(addsuffix .coati-mar-mg.fasta, GENE_IDS))
+
+.PHONY: raw_fasta_aligned/coati-mar-mg
+
+step/2_empirical_alignments: raw_fasta_aligned/coati-mar-mg
+
+##
+
+raw_fasta_aligned/coati-mar-ecm/%.coati-mar-ecm.fasta: raw_fasta/%.fasta
+	$(COATI_BIN) $< -m mar-ecm -o $@
+
+raw_fasta_aligned/coati-mar-ecm: $(addprefix raw_fasta_aligned/coati-mar-ecm/, $(addsuffix .coati-mar-ecm.fasta, GENE_IDS))
+
+.PHONY: raw_fasta_aligned/coati-mar-ecm
+
+step/2_empirical_alignments: raw_fasta_aligned/coati-mar-ecm
+
+##
+
+raw_fasta_aligned/coati-dna/%.coati-dna.fasta: raw_fasta/%.fasta
+	$(COATI_BIN) $< -m dna -o $@
+
+raw_fasta_aligned/coati-dna: $(addprefix raw_fasta_aligned/coati-dna/, $(addsuffix .coati-dna.fasta, GENE_IDS))
+
+.PHONY: raw_fasta_aligned/coati-dna
+
+step/2_empirical_alignments: raw_fasta_aligned/coati-dna
+
+## PRANK #######################################################################
 
 raw_fasta_aligned/prank/%.prank.fasta: raw_fasta/%.fasta
 	$(PRANK_BIN) -codon -d="$<" -o=$@ -quiet &>/dev/null
@@ -73,20 +131,46 @@ raw_fasta_aligned/prank: $(addprefix raw_fasta_aligned/prank/, $(addsuffix .pran
 
 .PHONY: raw_fasta_aligned/prank
 
-################################################################################
-# Initial alignments with all methods (aln recipes in Makefile_aln.mak)        #
-################################################################################
-.PHONY: initial_alignment
+step/2_empirical_alignments: raw_fasta_aligned/prank
 
-FILTERED = $(shell cat data/filtered.csv 2> /dev/null)
-INITIAL_ALIGNMENTS = data/filtered.csv \
-					$(addprefix aln/macse/,$(FILTERED)) \
-					$(addprefix aln/mafft/,$(FILTERED)) \
-					$(addprefix aln/$(COATI_MODEL)/,$(FILTERED)) \
-					$(addprefix aln/clustalo/,$(FILTERED)) \
-					$(addprefix aln/prank/,$(FILTERED))
+## MAFFT #######################################################################
 
-initial_alignment: $(INITIAL_ALIGNMENTS)
+raw_fasta_aligned/mafft/%.mafft.fasta: raw_fasta/%.fasta
+	$(MAFFT_BIN) --nuc --globalpair --maxiterate 1000 --preservecase --quiet $< > $@
+	
+raw_fasta_aligned/mafft: $(addprefix raw_fasta_aligned/mafft/, $(addsuffix .mafft.fasta, GENE_IDS))
+
+.PHONY: raw_fasta_aligned/mafft
+
+step/2_empirical_alignments: raw_fasta_aligned/mafft
+
+## CLUSTAL OMEGA ################################################################
+
+# Wrap the following command:
+#    clustalo --seqtype=Protein --infile=- --output-order=input-order
+
+raw_fasta_aligned/clustalo/%.clustalo.fasta: raw_fasta/%.fasta
+	$(RSCRIPT) scripts/clustalo_wrapper.R "$(CLUSTALO_BIN)" $< $@
+	
+raw_fasta_aligned/clustalo: $(addprefix raw_fasta_aligned/clustalo/, $(addsuffix .clustalo.fasta, GENE_IDS))
+
+.PHONY: raw_fasta_aligned/clustalo
+
+step/2_empirical_alignments: raw_fasta_aligned/clustalo
+
+## MACSE #######################################################################
+
+# Wrap the following command:
+#    java -jar macse.jar -prog alignSequences -seq temp1 -seq_lr temp2
+
+raw_fasta_aligned/macse/%.macse.fasta: raw_fasta/%.fasta
+	$(RSCRIPT) scripts/macse_wrapper.R "$(MACSE_JAR)" $< $@
+	
+raw_fasta_aligned/macse: $(addprefix raw_fasta_aligned/macse/, $(addsuffix .macse.fasta, GENE_IDS))
+
+.PHONY: raw_fasta_aligned/macse
+
+step/2_empirical_alignments: raw_fasta_aligned/macse
 
 ################################################################################
 # Identify which initial alignments have gaps                                  #
