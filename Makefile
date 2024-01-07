@@ -70,7 +70,7 @@ step/2_empirical_alignments:
 
 .PHONY: step/2_empirical_alignments
 
-## COATI #######################################################################
+## COATI TRI-MG ################################################################
 
 raw_fasta_aligned/coati-tri-mg/%.coati-tri-mg.fasta: raw_fasta/%.fasta
 	$(COATI_BIN) $< -m tri-mg -o $@
@@ -81,7 +81,7 @@ raw_fasta_aligned/coati-tri-mg: $(addprefix raw_fasta_aligned/coati-tri-mg/, $(a
 
 step/2_empirical_alignments: raw_fasta_aligned/coati-tri-mg
 
-##
+## COATI TRI-ECM ###############################################################
 
 raw_fasta_aligned/coati-tri-ecm/%.coati-tri-ecm.fasta: raw_fasta/%.fasta
 	$(COATI_BIN) $< -m tri-ecm -o $@
@@ -92,7 +92,7 @@ raw_fasta_aligned/coati-tri-ecm: $(addprefix raw_fasta_aligned/coati-tri-ecm/, $
 
 step/2_empirical_alignments: raw_fasta_aligned/coati-tri-ecm
 
-##
+## COATI MAR-MG ################################################################
 
 raw_fasta_aligned/coati-mar-mg/%.coati-mar-mg.fasta: raw_fasta/%.fasta
 	$(COATI_BIN) $< -m mar-mg -o $@
@@ -103,7 +103,7 @@ raw_fasta_aligned/coati-mar-mg: $(addprefix raw_fasta_aligned/coati-mar-mg/, $(a
 
 step/2_empirical_alignments: raw_fasta_aligned/coati-mar-mg
 
-##
+## COATI MAR-ECM ###############################################################
 
 raw_fasta_aligned/coati-mar-ecm/%.coati-mar-ecm.fasta: raw_fasta/%.fasta
 	$(COATI_BIN) $< -m mar-ecm -o $@
@@ -114,7 +114,7 @@ raw_fasta_aligned/coati-mar-ecm: $(addprefix raw_fasta_aligned/coati-mar-ecm/, $
 
 step/2_empirical_alignments: raw_fasta_aligned/coati-mar-ecm
 
-##
+## COATI DNA ###################################################################
 
 raw_fasta_aligned/coati-dna/%.coati-dna.fasta: raw_fasta/%.fasta
 	$(COATI_BIN) $< -m dna -o $@
@@ -124,6 +124,17 @@ raw_fasta_aligned/coati-dna: $(addprefix raw_fasta_aligned/coati-dna/, $(addsuff
 .PHONY: raw_fasta_aligned/coati-dna
 
 step/2_empirical_alignments: raw_fasta_aligned/coati-dna
+
+## REV COATI TRI-MG ############################################################
+
+raw_fasta_aligned/rev-coati-tri-mg/%.rev-coati-tri-mg.fasta: raw_fasta/%.fasta
+	$(RSCRIPT) scripts/rev_coati_wrapper.R "$(COATI_BIN)" tri-mg $< $@
+
+raw_fasta_aligned/rev-coati-tri-mg: $(addprefix raw_fasta_aligned/rev-coati-tri-mg/, $(addsuffix .rev-coati-tri-mg.fasta, $(GENE_IDS)))
+
+.PHONY: raw_fasta_aligned/rev-coati-tri-mg
+
+step/2_empirical_alignments: raw_fasta_aligned/rev-coati-tri-mg
 
 ## PRANK #######################################################################
 
