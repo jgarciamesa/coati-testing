@@ -13,6 +13,10 @@ include raw_fasta/gene_id_list.mk
 # STEP 1: Download empirical CDS sequences and create unaligned fasta files    #
 ################################################################################
 
+step/1_download_raw_fasta:
+
+.PHONY: step/1_download_raw_fasta
+
 # Download CDS sequences for every human-gorilla orthologous gene pair where
 #   - Both genes are on autosomes and encode proteins
 #   - The human sequence has a CCDS annotation
@@ -40,17 +44,17 @@ raw_fasta/.script_done: scripts/write_raw_fasta.R raw_fasta/hs-gg_gene_pairs.csv
 
 raw_fasta/gene_id_list.mk: raw_fasta/hs-gg_gene_pairs.csv.gz
 	echo "GENE_IDS = \\" > $@
-	zcat $< | awk -F, 'NR > 1 { print "   " $$1 ", \\" }' >> $@
+	zcat $< | awk -F, 'NR > 1 { print "   " $$1 " \\" }' >> $@
 	echo "" >> $@
 
 results/raw_fasta_metrics.csv: scripts/create_raw_fasta_metrics.R raw_fasta/.script_done
 	$(RSCRIPT) scripts/create_raw_fasta_metrics.R raw_fasta $@
 
-
-raw_fasta: raw_fasta/.script_done results/raw_fasta_metrics.csv
+raw_fasta: raw_fasta/.script_done raw_fasta/gene_id_list.mk results/raw_fasta_metrics.csv
 
 .PHONY: raw_fasta
 
+step/1_download_raw_fasta: raw_fasta
 
 ################################################################################
 # STEP 2: Align empirical CDS sequences                                        #
@@ -71,7 +75,7 @@ step/2_empirical_alignments:
 raw_fasta_aligned/coati-tri-mg/%.coati-tri-mg.fasta: raw_fasta/%.fasta
 	$(COATI_BIN) $< -m tri-mg -o $@
 
-raw_fasta_aligned/coati-tri-mg: $(addprefix raw_fasta_aligned/coati-tri-mg/, $(addsuffix .coati-tri-mg.fasta, GENE_IDS))
+raw_fasta_aligned/coati-tri-mg: $(addprefix raw_fasta_aligned/coati-tri-mg/, $(addsuffix .coati-tri-mg.fasta, $(GENE_IDS)))
 
 .PHONY: raw_fasta_aligned/coati-tri-mg
 
@@ -82,7 +86,7 @@ step/2_empirical_alignments: raw_fasta_aligned/coati-tri-mg
 raw_fasta_aligned/coati-tri-ecm/%.coati-tri-ecm.fasta: raw_fasta/%.fasta
 	$(COATI_BIN) $< -m tri-ecm -o $@
 
-raw_fasta_aligned/coati-tri-ecm: $(addprefix raw_fasta_aligned/coati-tri-ecm/, $(addsuffix .coati-tri-ecm.fasta, GENE_IDS))
+raw_fasta_aligned/coati-tri-ecm: $(addprefix raw_fasta_aligned/coati-tri-ecm/, $(addsuffix .coati-tri-ecm.fasta, $(GENE_IDS)))
 
 .PHONY: raw_fasta_aligned/coati-tri-ecm
 
@@ -93,7 +97,7 @@ step/2_empirical_alignments: raw_fasta_aligned/coati-tri-ecm
 raw_fasta_aligned/coati-mar-mg/%.coati-mar-mg.fasta: raw_fasta/%.fasta
 	$(COATI_BIN) $< -m mar-mg -o $@
 
-raw_fasta_aligned/coati-mar-mg: $(addprefix raw_fasta_aligned/coati-mar-mg/, $(addsuffix .coati-mar-mg.fasta, GENE_IDS))
+raw_fasta_aligned/coati-mar-mg: $(addprefix raw_fasta_aligned/coati-mar-mg/, $(addsuffix .coati-mar-mg.fasta, $(GENE_IDS)))
 
 .PHONY: raw_fasta_aligned/coati-mar-mg
 
@@ -104,7 +108,7 @@ step/2_empirical_alignments: raw_fasta_aligned/coati-mar-mg
 raw_fasta_aligned/coati-mar-ecm/%.coati-mar-ecm.fasta: raw_fasta/%.fasta
 	$(COATI_BIN) $< -m mar-ecm -o $@
 
-raw_fasta_aligned/coati-mar-ecm: $(addprefix raw_fasta_aligned/coati-mar-ecm/, $(addsuffix .coati-mar-ecm.fasta, GENE_IDS))
+raw_fasta_aligned/coati-mar-ecm: $(addprefix raw_fasta_aligned/coati-mar-ecm/, $(addsuffix .coati-mar-ecm.fasta, $(GENE_IDS)))
 
 .PHONY: raw_fasta_aligned/coati-mar-ecm
 
@@ -115,7 +119,7 @@ step/2_empirical_alignments: raw_fasta_aligned/coati-mar-ecm
 raw_fasta_aligned/coati-dna/%.coati-dna.fasta: raw_fasta/%.fasta
 	$(COATI_BIN) $< -m dna -o $@
 
-raw_fasta_aligned/coati-dna: $(addprefix raw_fasta_aligned/coati-dna/, $(addsuffix .coati-dna.fasta, GENE_IDS))
+raw_fasta_aligned/coati-dna: $(addprefix raw_fasta_aligned/coati-dna/, $(addsuffix .coati-dna.fasta, $(GENE_IDS)))
 
 .PHONY: raw_fasta_aligned/coati-dna
 
@@ -127,7 +131,7 @@ raw_fasta_aligned/prank/%.prank.fasta: raw_fasta/%.fasta
 	$(PRANK_BIN) -codon -d="$<" -o=$@ -quiet &>/dev/null
 	if [ -f $@.best.fas ]; then mv $@.best.fas $@; else touch $@; fi
 
-raw_fasta_aligned/prank: $(addprefix raw_fasta_aligned/prank/, $(addsuffix .prank.fasta, GENE_IDS))
+raw_fasta_aligned/prank: $(addprefix raw_fasta_aligned/prank/, $(addsuffix .prank.fasta, $(GENE_IDS)))
 
 .PHONY: raw_fasta_aligned/prank
 
@@ -138,7 +142,7 @@ step/2_empirical_alignments: raw_fasta_aligned/prank
 raw_fasta_aligned/mafft/%.mafft.fasta: raw_fasta/%.fasta
 	$(MAFFT_BIN) --nuc --globalpair --maxiterate 1000 --preservecase --quiet $< > $@
 	
-raw_fasta_aligned/mafft: $(addprefix raw_fasta_aligned/mafft/, $(addsuffix .mafft.fasta, GENE_IDS))
+raw_fasta_aligned/mafft: $(addprefix raw_fasta_aligned/mafft/, $(addsuffix .mafft.fasta, $(GENE_IDS)))
 
 .PHONY: raw_fasta_aligned/mafft
 
@@ -152,7 +156,7 @@ step/2_empirical_alignments: raw_fasta_aligned/mafft
 raw_fasta_aligned/clustalo/%.clustalo.fasta: raw_fasta/%.fasta
 	$(RSCRIPT) scripts/clustalo_wrapper.R "$(CLUSTALO_BIN)" $< $@
 	
-raw_fasta_aligned/clustalo: $(addprefix raw_fasta_aligned/clustalo/, $(addsuffix .clustalo.fasta, GENE_IDS))
+raw_fasta_aligned/clustalo: $(addprefix raw_fasta_aligned/clustalo/, $(addsuffix .clustalo.fasta, $(GENE_IDS)))
 
 .PHONY: raw_fasta_aligned/clustalo
 
@@ -166,7 +170,7 @@ step/2_empirical_alignments: raw_fasta_aligned/clustalo
 raw_fasta_aligned/macse/%.macse.fasta: raw_fasta/%.fasta
 	$(RSCRIPT) scripts/macse_wrapper.R "$(MACSE_JAR)" $< $@
 	
-raw_fasta_aligned/macse: $(addprefix raw_fasta_aligned/macse/, $(addsuffix .macse.fasta, GENE_IDS))
+raw_fasta_aligned/macse: $(addprefix raw_fasta_aligned/macse/, $(addsuffix .macse.fasta, $(GENE_IDS)))
 
 .PHONY: raw_fasta_aligned/macse
 
