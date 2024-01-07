@@ -14,4 +14,4 @@
 module purge
 module add r-4.3.0-aocc-3.1.0
 
-make -j ${SLURM_CPUS_PER_TASK} $1
+make -k -j ${SLURM_CPUS_PER_TASK} $1
