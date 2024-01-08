@@ -157,10 +157,15 @@ step/2_empirical_alignments: raw_fasta_aligned/prank
 
 raw_fasta_aligned/mafft/%.mafft.fasta: raw_fasta/%.fasta
 	$(MAFFT_BIN) --nuc --globalpair --maxiterate 1000 --preservecase --quiet $< > $@
-	
-raw_fasta_aligned/mafft: $(addprefix raw_fasta_aligned/mafft/, $(addsuffix .mafft.fasta, $(GENE_IDS)))
+
+RAWALN_FILES_MAFFT=$(addprefix raw_fasta_aligned/mafft/, $(addsuffix .mafft.fasta, $(GENE_IDS)))
+
+raw_fasta_aligned/mafft: $(RAWALN_FILES_MAFFT)
 
 .PHONY: raw_fasta_aligned/mafft
+
+raw_fasta_aligned/mafft/mafft.archive.tar.gz: raw_fasta/hs-gg_gene_pairs.csv.gz $(RAWALN_FILES_MAFFT)
+	zcat $< | awk -F, 'NR > 1 { print "raw_fasta_aligned/mafft/" $$1 ".mafft.fasta" }' | tar cvzf $@ -T -
 
 step/2_empirical_alignments: raw_fasta_aligned/mafft
 
@@ -171,10 +176,15 @@ step/2_empirical_alignments: raw_fasta_aligned/mafft
 
 raw_fasta_aligned/clustalo/%.clustalo.fasta: raw_fasta/%.fasta
 	$(RSCRIPT) scripts/clustalo_wrapper.R "$(CLUSTALO_BIN)" $< $@
-	
-raw_fasta_aligned/clustalo: $(addprefix raw_fasta_aligned/clustalo/, $(addsuffix .clustalo.fasta, $(GENE_IDS)))
+
+RAWALN_FILES_CLUSTALO=$(addprefix raw_fasta_aligned/clustalo/, $(addsuffix .clustalo.fasta, $(GENE_IDS)))
+
+raw_fasta_aligned/clustalo: $(RAWALN_FILES_CLUSTALO)
 
 .PHONY: raw_fasta_aligned/clustalo
+
+raw_fasta_aligned/clustalo/clustalo.archive.tar.gz: raw_fasta/hs-gg_gene_pairs.csv.gz $(RAWALN_FILES_CLUSTALO)
+	zcat $< | awk -F, 'NR > 1 { print "raw_fasta_aligned/clustalo/" $$1 ".clustalo.fasta" }' | tar cvzf $@ -T -
 
 step/2_empirical_alignments: raw_fasta_aligned/clustalo
 
@@ -185,10 +195,15 @@ step/2_empirical_alignments: raw_fasta_aligned/clustalo
 
 raw_fasta_aligned/macse/%.macse.fasta: raw_fasta/%.fasta
 	$(RSCRIPT) scripts/macse_wrapper.R "$(MACSE_JAR)" $< $@
-	
-raw_fasta_aligned/macse: $(addprefix raw_fasta_aligned/macse/, $(addsuffix .macse.fasta, $(GENE_IDS)))
+
+RAWALN_FILES_MACSE=$(addprefix raw_fasta_aligned/macse/, $(addsuffix .macse.fasta, $(GENE_IDS)))
+
+raw_fasta_aligned/macse: $(RAWALN_FILES_MACSE)
 
 .PHONY: raw_fasta_aligned/macse
+
+raw_fasta_aligned/macse/macse.archive.tar.gz: raw_fasta/hs-gg_gene_pairs.csv.gz $(RAWALN_FILES_MACSE)
+	zcat $< | awk -F, 'NR > 1 { print "raw_fasta_aligned/macse/" $$1 ".macse.fasta" }' | tar cvzf $@ -T -
 
 step/2_empirical_alignments: raw_fasta_aligned/macse
 
