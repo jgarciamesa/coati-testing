@@ -125,7 +125,7 @@ raw_fasta_aligned/coati-dna: $(RAWALN_FILES_COATI_DNA)
 
 .PHONY: raw_fasta_aligned/coati-dna
 
-raw_fasta_aligned/coati-dna/coati-dna.archive.tar.gz: raw_fasta/hs-gg_gene_pairs.csv.gz $(RAWALN_FILES_REV_COATI)
+raw_fasta_aligned/coati-dna/coati-dna.archive.tar.gz: raw_fasta/hs-gg_gene_pairs.csv.gz $(RAWALN_FILES_COATI_DNA)
 	zcat $< | awk -F, 'NR > 1 { print "raw_fasta_aligned/coati-dna/" $$1 ".coati-dna.fasta" }' | tar cvzf $@ -T -
 
 step/2_empirical_alignments: raw_fasta_aligned/coati-dna
