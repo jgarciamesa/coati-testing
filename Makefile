@@ -148,8 +148,8 @@ raw_fasta_aligned/prank: $(RAWALN_FILES_PRANK)
 
 .PHONY: raw_fasta_aligned/prank
 
-raw_fasta_aligned/prank/prank.archive.tar.gz: $(RAWALN_FILES_PRANK)
-	tar cvzf $@ $^
+raw_fasta_aligned/prank/prank.archive.tar.gz: raw_fasta/hs-gg_gene_pairs.csv.gz $(RAWALN_FILES_PRANK)
+	zcat $< | awk -F, 'NR > 1 { print "raw_fasta_aligned/prank/" $$1 ".prank.fasta" }' | tar cvzf $@ -T -
 
 step/2_empirical_alignments: raw_fasta_aligned/prank
 
