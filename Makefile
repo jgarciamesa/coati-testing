@@ -142,9 +142,14 @@ raw_fasta_aligned/prank/%.prank.fasta: raw_fasta/%.fasta
 	$(PRANK_BIN) -codon -d="$<" -o=$@ -quiet &>/dev/null
 	if [ -f $@.best.fas ]; then mv $@.best.fas $@; else touch $@; fi
 
-raw_fasta_aligned/prank: $(addprefix raw_fasta_aligned/prank/, $(addsuffix .prank.fasta, $(GENE_IDS)))
+RAWALN_FILES_PRANK=$(addprefix raw_fasta_aligned/prank/, $(addsuffix .prank.fasta, $(GENE_IDS)))
+
+raw_fasta_aligned/prank: $(RAWALN_FILES_PRANK)
 
 .PHONY: raw_fasta_aligned/prank
+
+raw_fasta_aligned/prank/prank.archive.tar.gz: $(RAWALN_FILES_PRANK)
+	tar cvzf $@ $^
 
 step/2_empirical_alignments: raw_fasta_aligned/prank
 

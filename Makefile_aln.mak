@@ -33,7 +33,7 @@ aln/mafft/%: $(RAW_PATH)/%
 
 aln/clustalo/%: $(RAW_PATH)/%
 	@echo -ne "clustalo align $*\t\t\r"
-	@./bin/clustalo --force -i $< -o $@
+	@./bin/clustalo --force -t Protein -i $< -o $@
 
 aln/macse/%: $(RAW_PATH)/%
 	@echo -ne "macse align $*\t\t\r"
