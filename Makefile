@@ -75,9 +75,14 @@ step/2_empirical_alignments:
 raw_fasta_aligned/coati-tri-mg/%.coati-tri-mg.fasta: raw_fasta/%.fasta
 	$(COATI_BIN) $< -m tri-mg -o $@ || [ $$? -eq 1 ] && touch $@
 
-raw_fasta_aligned/coati-tri-mg: $(addprefix raw_fasta_aligned/coati-tri-mg/, $(addsuffix .coati-tri-mg.fasta, $(GENE_IDS)))
+RAWALN_FILES_COATI_TRIMG=$(addprefix raw_fasta_aligned/coati-tri-mg/, $(addsuffix .coati-tri-mg.fasta, $(GENE_IDS)))
+
+raw_fasta_aligned/coati-tri-mg: $(RAWALN_FILES_COATI_TRIMG)
 
 .PHONY: raw_fasta_aligned/coati-tri-mg
+
+raw_fasta_aligned/coati-tri-mg/coati-tri-mg.archive.tar.gz: raw_fasta/hs-gg_gene_pairs.csv.gz $(RAWALN_FILES_COATI_TRIMG)
+	zcat $< | awk -F, 'NR > 1 { print "raw_fasta_aligned/coati-tri-mg/" $$1 ".coati-tri-mg.fasta" }' | tar cvzf $@ -T -
 
 step/2_empirical_alignments: raw_fasta_aligned/coati-tri-mg
 
@@ -86,9 +91,14 @@ step/2_empirical_alignments: raw_fasta_aligned/coati-tri-mg
 raw_fasta_aligned/coati-tri-ecm/%.coati-tri-ecm.fasta: raw_fasta/%.fasta
 	$(COATI_BIN) $< -m tri-ecm -o $@ || [ $$? -eq 1 ] && touch $@
 
-raw_fasta_aligned/coati-tri-ecm: $(addprefix raw_fasta_aligned/coati-tri-ecm/, $(addsuffix .coati-tri-ecm.fasta, $(GENE_IDS)))
+RAWALN_FILES_COATI_TRIECM=$(addprefix raw_fasta_aligned/coati-tri-ecm/, $(addsuffix .coati-tri-ecm.fasta, $(GENE_IDS)))
+
+raw_fasta_aligned/coati-tri-ecm: $(RAWALN_FILES_COATI_TRIECM)
 
 .PHONY: raw_fasta_aligned/coati-tri-ecm
+
+raw_fasta_aligned/coati-tri-ecm/coati-tri-ecm.archive.tar.gz: raw_fasta/hs-gg_gene_pairs.csv.gz $(RAWALN_FILES_COATI_TRIECM)
+	zcat $< | awk -F, 'NR > 1 { print "raw_fasta_aligned/coati-tri-ecm/" $$1 ".coati-tri-ecm.fasta" }' | tar cvzf $@ -T -
 
 step/2_empirical_alignments: raw_fasta_aligned/coati-tri-ecm
 
@@ -97,9 +107,14 @@ step/2_empirical_alignments: raw_fasta_aligned/coati-tri-ecm
 raw_fasta_aligned/coati-mar-mg/%.coati-mar-mg.fasta: raw_fasta/%.fasta
 	$(COATI_BIN) $< -m mar-mg -o $@ || [ $$? -eq 1 ] && touch $@
 
-raw_fasta_aligned/coati-mar-mg: $(addprefix raw_fasta_aligned/coati-mar-mg/, $(addsuffix .coati-mar-mg.fasta, $(GENE_IDS)))
+RAWALN_FILES_COATI_MARMG=$(addprefix raw_fasta_aligned/coati-mar-mg/, $(addsuffix .coati-mar-mg.fasta, $(GENE_IDS)))
+
+raw_fasta_aligned/coati-mar-mg: $(RAWALN_FILES_COATI_MARMG)
 
 .PHONY: raw_fasta_aligned/coati-mar-mg
+
+raw_fasta_aligned/coati-mar-mg/coati-mar-mg.archive.tar.gz: raw_fasta/hs-gg_gene_pairs.csv.gz $(RAWALN_FILES_COATI_MARMG)
+	zcat $< | awk -F, 'NR > 1 { print "raw_fasta_aligned/coati-mar-mg/" $$1 ".coati-mar-mg.fasta" }' | tar cvzf $@ -T -
 
 step/2_empirical_alignments: raw_fasta_aligned/coati-mar-mg
 
@@ -108,9 +123,14 @@ step/2_empirical_alignments: raw_fasta_aligned/coati-mar-mg
 raw_fasta_aligned/coati-mar-ecm/%.coati-mar-ecm.fasta: raw_fasta/%.fasta
 	$(COATI_BIN) $< -m mar-ecm -o $@ || [ $$? -eq 1 ] && touch $@
 
-raw_fasta_aligned/coati-mar-ecm: $(addprefix raw_fasta_aligned/coati-mar-ecm/, $(addsuffix .coati-mar-ecm.fasta, $(GENE_IDS)))
+RAWALN_FILES_COATI_MARECM=$(addprefix raw_fasta_aligned/coati-mar-ecm/, $(addsuffix .coati-mar-ecm.fasta, $(GENE_IDS)))
+
+raw_fasta_aligned/coati-mar-ecm: $(RAWALN_FILES_COATI_MARECM)
 
 .PHONY: raw_fasta_aligned/coati-mar-ecm
+
+raw_fasta_aligned/coati-mar-ecm/coati-mar-ecm.archive.tar.gz: raw_fasta/hs-gg_gene_pairs.csv.gz $(RAWALN_FILES_COATI_MARECM)
+	zcat $< | awk -F, 'NR > 1 { print "raw_fasta_aligned/coati-mar-ecm/" $$1 ".coati-mar-ecm.fasta" }' | tar cvzf $@ -T -
 
 step/2_empirical_alignments: raw_fasta_aligned/coati-mar-ecm
 
