@@ -238,6 +238,24 @@ raw_fasta_aligned/macse/macse.archive.tar.gz: raw_fasta/hs-gg_gene_pairs.csv.gz 
 step/2_empirical_alignments: raw_fasta_aligned/macse
 
 ################################################################################
+# STEP 2 (Alt): Extract empirical alignments from archives.                    #
+################################################################################
+
+step/2a_extract_empirical_alignments:
+	tar -xvmf raw_fasta_aligned/clustalo/clustalo.archive.tar.gz
+	tar -xvmf raw_fasta_aligned/coati-dna/coati-dna.archive.tar.gz
+	tar -xvmf raw_fasta_aligned/coati-mar-ecm/coati-mar-ecm.archive.tar.gz
+	tar -xvmf raw_fasta_aligned/coati-mar-mg/coati-mar-mg.archive.tar.gz
+	tar -xvmf raw_fasta_aligned/coati-tri-ecm/coati-tri-ecm.archive.tar.gz
+	tar -xvmf raw_fasta_aligned/coati-tri-mg/coati-tri-mg.archive.tar.gz
+	tar -xvmf raw_fasta_aligned/macse/macse.archive.tar.gz
+	tar -xvmf raw_fasta_aligned/mafft/mafft.archive.tar.gz
+	tar -xvmf raw_fasta_aligned/prank/prank.archive.tar.gz
+	tar -xvmf raw_fasta_aligned/rev-coati-tri-mg/rev-coati-tri-mg.archive.tar.gz
+
+.PHONY: step/2a_extract_empirical_alignments
+
+################################################################################
 # Identify which initial alignments have gaps                                  #
 ################################################################################
 MODELS = $(COATI_MODEL) prank mafft clustalo macse

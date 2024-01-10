@@ -122,5 +122,6 @@ get_gene_table_main <- function() {
 if(!interactive()) {
     ARGS <- commandArgs(trailingOnly = TRUE)
     dat <- get_gene_table_main()
+    dat <- dat |> arrange(hsapiens_cds_length*ggorilla_cds_length)
     readr::write_csv(dat, ARGS[1])
 }
