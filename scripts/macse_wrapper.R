@@ -46,4 +46,13 @@ dna_aligned <- seqinr::read.fasta(out_nt_file, seqtype = "DNA", forceDNAtolower 
 
 dna_aligned <- dna_aligned |> map(\(x) {x[x == "!"] <- "-"; x})
 
+# remove any resiude-free columns
+no_nucs <- dna_aligned |>
+    map(\(x) which(x == "-")) |>
+    reduce(intersect)
+
+if(length(no_nucs)) {
+    dna_aligned <- dna_aligned |> map(\(x) x[-no_nucs])
+}
+
 seqinr::write.fasta(dna_aligned, names(dna_aligned), file.out = output_path)

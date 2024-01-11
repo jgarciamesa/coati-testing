@@ -256,6 +256,21 @@ step/2a_extract_empirical_alignments:
 .PHONY: step/2a_extract_empirical_alignments
 
 ################################################################################
+# STEP 3: Generate alignment statistics                                        #
+################################################################################
+
+METHODS = clustalo coati-dna coati-mar-ecm coati-mar-mg coati-tri-ecm \
+    coati-tri-mg macse mafft prank rev-coati-tri-mg
+
+raw_fasta_aligned/%/stats.csv: scripts/aln_data.R
+	$(RSCRIPT) scripts/aln_data.R raw_fasta_aligned/$* > $@
+
+results/raw_fasta_aligned_stats.csv.gz: $(addprefix raw_fasta_aligned/,$(addsuffix /stats.csv,$(METHODS)))
+	$(RSCRIPT) -e "commandArgs(TRUE) |> \
+	purrr::map(\(x) readr::read_csv(x, col_types = readr::cols(.default = \"c\"))) |> \
+	purrr::list_rbind() |> readr::write_csv(\"$@\")" $^
+
+################################################################################
 # Identify which initial alignments have gaps                                  #
 ################################################################################
 MODELS = $(COATI_MODEL) prank mafft clustalo macse
