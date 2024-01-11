@@ -42,7 +42,7 @@ raw_fasta/.script_done: scripts/write_raw_fasta.R raw_fasta/hs-gg_gene_pairs.csv
 		raw_fasta
 	touch $@
 
-raw_fasta/gene_id_list.mk: raw_fasta/hs-gg_gene_pairs.csv.gz
+raw_fasta/gene_id_list.mk: | raw_fasta/hs-gg_gene_pairs.csv.gz
 	echo "GENE_IDS = \\" > $@
 	zcat $< | awk -F, 'NR > 1 { print "   " $$1 " \\" }' >> $@
 	echo "" >> $@
@@ -374,3 +374,6 @@ clean_pipeline:
 	rm -f results/results_summary.csv
 
 include Makefile_aln.mak
+
+
+# find raw_fasta_aligned -type f -name '*.fasta' -exec touch {} +
