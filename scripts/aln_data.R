@@ -25,10 +25,12 @@ calculate_omega <- function(aln) { #dN/dS
     }
 }
 
-create_cigar <- function(anc, dec) {
+create_cigar <- function(anc, dec, use_match = FALSE) {
     x <- case_when(
         anc == "-" ~ "I",
         dec == "-" ~ "D",
+        !use_match & anc == dec ~ "=",
+        !use_match ~ "X",
         TRUE ~ "M"
     )
     x <- rle(x)
