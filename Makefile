@@ -270,6 +270,20 @@ results/raw_fasta_aligned_stats.csv.gz: $(addprefix raw_fasta_aligned/,$(addsuff
 	purrr::map(\(x) readr::read_csv(x, col_types = readr::cols(.default = \"c\"))) |> \
 	purrr::list_rbind() |> readr::write_csv(\"$@\")" $^
 
+step/3_generate_stats: results/raw_fasta_aligned_stats.csv.gz
+
+.PHONY: step/3_generate_stats
+
+################################################################################
+# STEP 4: Create benchmark alignments                                          #
+################################################################################
+
+## Benchmark Data ##############################################################
+
+benchmark_fasta/gap_patterns.csv.gz benchmark_fasta/gapped_genes.txt benchmark_fasta/gapless_genes.txt: results/raw_fasta_aligned_stats.csv.gz scripts/gather_benchmark_data.R
+	$(RSCRIPT) scripts/gather_benchmark_data.R
+
+
 ################################################################################
 # Identify which initial alignments have gaps                                  #
 ################################################################################

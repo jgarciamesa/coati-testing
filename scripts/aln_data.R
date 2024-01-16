@@ -29,9 +29,11 @@ create_cigar <- function(anc, dec, use_match = FALSE) {
     x <- case_when(
         anc == "-" ~ "I",
         dec == "-" ~ "D",
-        !use_match & anc == dec ~ "=",
-        !use_match ~ "X",
-        TRUE ~ "M"
+        use_match ~ "M",
+        anc == dec ~ "=",
+        anc == "N" ~ "=",
+        dec == "N" ~ "=",
+        TRUE ~ "X"
     )
     x <- rle(x)
     str_c(x$lengths, x$values, collapse="")
