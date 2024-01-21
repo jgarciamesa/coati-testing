@@ -41,10 +41,10 @@ create_cigar <- function(anc, dec, use_match = FALSE) {
 
 # path <- "raw_fasta_aligned/coati-tri-mg/ENSG00000000419.coati-tri-mg.fasta"
 
-process_file <- function(path) {
+process_file <- function(path, method = NULL) {
     file <- path_file(path) |> path_ext_remove()
     gene <- path_ext_remove(file)
-    method <- path_ext(file)
+    method <- method %||% path_ext(file)
 
     x <- try(seqinr::read.fasta(path, forceDNAtolower = FALSE), silent = TRUE)
 
@@ -105,10 +105,10 @@ process_file <- function(path) {
 
 }
 
-aln_data_main <- function(input_dir) {
-    files <- dir_ls(input_dir, type = "file", glob = "*\\bENS*.fasta")
+aln_data_main <- function(input_dir, method = NULL) {
+    files <- dir_ls(input_dir, type = "file", regexp = "\\b(ENS|TEST)*.fasta$")
 
-    dat <- files |> map(process_file)
+    dat <- files |> map(\(x) process_file(x, method))
     dat <- dat |> map(as_tibble_row) |>
         list_rbind()
 
@@ -117,6 +117,11 @@ aln_data_main <- function(input_dir) {
 
 if(!rlang::is_interactive()) {
     args <- commandArgs(trailingOnly = TRUE)
-    dat <- aln_data_main(args[[1]])
+    if(length(args) >= 2) {
+        method <- args[[2]]
+    } else {
+        method <- NULL
+    }
+    dat <- aln_data_main(args[[1]], method)
     cat(format_csv(dat))
 }

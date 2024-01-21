@@ -31,13 +31,19 @@ gather_main <- function() {
     aln_data <- aln_data |> 
         filter(method %in%
             c("clustalo", "coati-tri-mg", "macse", "mafft", "prank")) |>
-        mutate(cigar = simplify_cigar(cigar))
+        mutate(cigar = simplify_cigar(cigar)) |>
+        drop_na(cigar) |>
+        filter(n() == 5, .by=gene)
 
+    # identify gap patterns
     gap_data <- aln_data |>
         filter(str_detect(cigar, "[ID]")) |>
         select(gene, method, cigar)
 
+    # identify genes that had gap patterns by at least one method
     gapped_genes <- sort(unique(gap_data$gene))
+
+    # identify genes that were gapless by all 5 methods
     gapless_genes <- setdiff(sort(unique(aln_data$gene)), gapped_genes)
 
     list(cigar = gap_data,

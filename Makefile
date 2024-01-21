@@ -283,6 +283,16 @@ step/3_generate_stats: results/raw_fasta_aligned_stats.csv.gz
 benchmark_fasta/gap_patterns.csv.gz benchmark_fasta/gapped_genes.txt benchmark_fasta/gapless_genes.txt: results/raw_fasta_aligned_stats.csv.gz scripts/gather_benchmark_data.R
 	$(RSCRIPT) scripts/gather_benchmark_data.R
 
+benchmark_fasta/.script_done: benchmark_fasta/gap_patterns.csv.gz benchmark_fasta/gapless_genes.txt scripts/simulate_benchmarks.R
+	$(RSCRIPT) scripts/simulate_benchmarks.R
+	touch $@
+
+benchmark_fasta/stats.csv: scripts/aln_data.R
+	$(RSCRIPT) scripts/aln_data.R benchmark_fasta benchmark > $@
+
+step/4_simulate_benchmarks: benchmark_fasta/.script_done
+
+.PHONY: step/4_simulate_benchmarks
 
 ################################################################################
 # Identify which initial alignments have gaps                                  #
