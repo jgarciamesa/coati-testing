@@ -86,7 +86,7 @@ simulate_alignment <- function(sequences, gap_patterns) {
         B0 <- sample(names(codons), size = ceiling(sum(aln %in% c("M", "I"))/3),
             replace = TRUE, prob = codons)
         B0 <- str_split(B0, "") |> list_c()
-        B0 <- B0[sum(aln %in% c("M", "I"))]
+        B0 <- B0[seq_len(sum(aln %in% c("M", "I")))]
         BB <- rep("N", length(aln))
         BB[aln %in% c("M", "I")] <- B0
 
