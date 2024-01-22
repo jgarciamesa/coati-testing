@@ -3,7 +3,7 @@
 #SBATCH -N 1            # number of nodes
 #SBATCH -c 1            # number of cores
 #SBATCH -t 0-01:00:00   # time in d-hh:mm:ss
-#SBATCH --mem=16G       # memory limit
+#SBATCH --mem=24G       # memory limit
 #SBATCH -p htc          # partition
 #SBATCH -q public       # QOS
 #SBATCH -o logs/slurm.%j.out # file to save job's STDOUT (%j = JobId)
