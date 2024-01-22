@@ -1,5 +1,5 @@
 # This file contains the rules for aligning sequences. This allows alignment to
-# parallelized without having to process the full dependency list.
+# be parallelized without having to process the full dependency list.
 
 RSCRIPT ?= Rscript --vanilla
 SHELL ?= /bin/bash -e -o pipefail

@@ -253,8 +253,11 @@ benchmark_fasta/stats.csv: scripts/aln_data.R
 
 benchmark_fasta/test_id_list.mk: | benchmark_fasta/gapless_genes.txt
 	echo "TEST_IDS = \\" > $@
-	cat benchmark_fasta/gapless_genes.txt | awk '{ printf "    TEST%06d \\\n", NR }' >> $@
+	cat $| | awk '{ printf "    TEST%06d \\\n", NR }' >> $@
 	echo "" >> $@
+
+benchmark_fasta/test_id_list.txt: | benchmark_fasta/gapless_genes.txt
+	cat $| | awk '{ printf "TEST%06d\n", NR }' > $@
 
 step/4_simulate_benchmarks: benchmark_fasta/.script_done
 
@@ -300,6 +303,9 @@ benchmark_fasta_aligned/coati-tri-mg: $(TSTALN_FILES_COATI_TRIMG)
 .PHONY: benchmark_fasta_aligned/coati-tri-mg
 
 step/5_benchmark_alignments: benchmark_fasta_aligned/coati-tri-mg
+
+benchmark_fasta_aligned/coati-tri-mg/coati-tri-mg.archive.tar.gz: benchmark_fasta/test_id_list.txt $(TSTALN_FILES_COATI_TRIMG)
+	cat $< | awk '{ print "benchmark_fasta_aligned/coati-tri-mg/" $$1 ".coati-tri-mg.fasta" }' | tar cvzf $@ -T -
 
 ## COATI TRI-ECM ###############################################################
 
