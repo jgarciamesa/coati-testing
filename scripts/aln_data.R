@@ -41,7 +41,7 @@ create_cigar <- function(anc, dec, use_match = FALSE) {
 
 # path <- "raw_fasta_aligned/coati-tri-mg/ENSG00000000419.coati-tri-mg.fasta"
 
-process_file <- function(path, method = NULL) {
+process_file <- function(path, method) {
     file <- path_file(path) |> path_ext_remove()
     gene <- path_ext_remove(file)
     method <- method %||% path_ext(file)
@@ -105,7 +105,7 @@ process_file <- function(path, method = NULL) {
 
 }
 
-aln_data_main <- function(input_dir, method = NULL) {
+aln_data_main <- function(input_dir, method) {
     files <- dir_ls(input_dir, type = "file", regexp = "\\b(ENS|TEST)*.fasta$")
 
     dat <- files |> map(\(x) process_file(x, method))
@@ -117,11 +117,6 @@ aln_data_main <- function(input_dir, method = NULL) {
 
 if(!rlang::is_interactive()) {
     args <- commandArgs(trailingOnly = TRUE)
-    if(length(args) >= 2) {
-        method <- args[[2]]
-    } else {
-        method <- NULL
-    }
-    dat <- aln_data_main(args[[1]], method)
-    cat(format_csv(dat))
+    dat <- aln_data_main(args[[1]], args[[2]])
+    write_csv(dat, args[[3]])
 }

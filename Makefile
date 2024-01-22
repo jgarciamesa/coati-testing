@@ -223,10 +223,10 @@ step/2a_extract_empirical_alignments:
 METHODS = clustalo coati-dna coati-mar-ecm coati-mar-mg coati-tri-ecm \
     coati-tri-mg macse mafft prank rev-coati-tri-mg
 
-raw_fasta_aligned/%/stats.csv: scripts/aln_data.R
-	$(RSCRIPT) scripts/aln_data.R raw_fasta_aligned/$* > $@
+raw_fasta_aligned/%/stats.csv.gz: scripts/aln_data.R
+	$(RSCRIPT) scripts/aln_data.R raw_fasta_aligned/$* $* $@
 
-results/raw_fasta_aligned_stats.csv.gz: $(addprefix raw_fasta_aligned/,$(addsuffix /stats.csv,$(METHODS)))
+results/raw_fasta_aligned_stats.csv.gz: $(addprefix raw_fasta_aligned/,$(addsuffix /stats.csv.gz,$(METHODS)))
 	$(RSCRIPT) -e "commandArgs(TRUE) |> \
 	purrr::map(\(x) readr::read_csv(x, col_types = readr::cols(.default = \"c\"))) |> \
 	purrr::list_rbind() |> readr::write_csv(\"$@\")" $^
@@ -241,7 +241,7 @@ step/3_generate_stats: results/raw_fasta_aligned_stats.csv.gz
 
 ## Benchmark Data ##############################################################
 
-benchmark_fasta/gap_patterns.csv.gz benchmark_fasta/gapped_genes.txt benchmark_fasta/gapless_genes.txt: | results/raw_fasta_aligned_stats.csv.gz scripts/gather_benchmark_data.R
+benchmark_fasta/gap_patterns.csv.gz benchmark_fasta/gapped_genes.txt benchmark_fasta/gapless_genes.txt: results/raw_fasta_aligned_stats.csv.gz scripts/gather_benchmark_data.R
 	$(RSCRIPT) scripts/gather_benchmark_data.R
 
 benchmark_fasta/.script_done: benchmark_fasta/gap_patterns.csv.gz benchmark_fasta/gapless_genes.txt scripts/simulate_benchmarks.R
