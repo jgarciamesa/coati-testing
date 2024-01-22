@@ -274,11 +274,11 @@ benchmark_fasta_nogaps/benchmark_nogaps.archive.tar.gz: benchmark_fasta/gapless_
 # STEP 4 (Alt): Extract benchmark alignments from archives.                    #
 ################################################################################
 
-step/4a_extract_empirical_alignments:
+step/4a_extract_benchmark_alignments:
 	tar -xvmf benchmark_fasta/benchmark.archive.tar.gz
 	tar -xvmf benchmark_fasta_nogaps/benchmark_nogaps.archive.tar.gz
 
-.PHONY: step/4a_extract_empirical_alignments
+.PHONY: step/4a_extract_benchmark_alignments
 
 ################################################################################
 # STEP 5: Align benchmark alignments                                           #
