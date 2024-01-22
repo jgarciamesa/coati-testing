@@ -47,6 +47,9 @@ raw_fasta/gene_id_list.mk: | raw_fasta/hs-gg_gene_pairs.csv.gz
 	zcat raw_fasta/hs-gg_gene_pairs.csv.gz | awk -F, 'NR > 1 { print "    " $$1 " \\" }' >> $@
 	echo "" >> $@
 
+raw_fasta/gene_id_list.txt: | raw_fasta/hs-gg_gene_pairs.csv.gz
+	zcat raw_fasta/hs-gg_gene_pairs.csv.gz | awk -F, 'NR > 1 { print $$1 }' | sort > $@
+
 results/raw_fasta_metrics.csv: scripts/create_raw_fasta_metrics.R raw_fasta/.script_done
 	$(RSCRIPT) scripts/create_raw_fasta_metrics.R raw_fasta $@
 
@@ -79,11 +82,6 @@ raw_fasta_aligned/coati-tri-mg: $(RAWALN_FILES_COATI_TRIMG)
 
 step/2_empirical_alignments: raw_fasta_aligned/coati-tri-mg
 
-raw_fasta_aligned/coati-tri-mg/coati-tri-mg.archive.tar.gz: raw_fasta/hs-gg_gene_pairs.csv.gz $(RAWALN_FILES_COATI_TRIMG)
-	zcat $< | awk -F, 'NR > 1 { print "raw_fasta_aligned/coati-tri-mg/" $$1 ".coati-tri-mg.fasta" }' | tar cvzf $@ -T -
-
-step/2_empirical_alignments: raw_fasta_aligned/coati-tri-mg/coati-tri-mg.archive.tar.gz
-
 ## COATI TRI-ECM ###############################################################
 
 RAWALN_FILES_COATI_TRIECM=$(addprefix raw_fasta_aligned/coati-tri-ecm/,\
@@ -94,11 +92,6 @@ raw_fasta_aligned/coati-tri-ecm: $(RAWALN_FILES_COATI_TRIECM)
 .PHONY: raw_fasta_aligned/coati-tri-ecm
 
 step/2_empirical_alignments: raw_fasta_aligned/coati-tri-ecm
-
-raw_fasta_aligned/coati-tri-ecm/coati-tri-ecm.archive.tar.gz: raw_fasta/hs-gg_gene_pairs.csv.gz $(RAWALN_FILES_COATI_TRIECM)
-	zcat $< | awk -F, 'NR > 1 { print "raw_fasta_aligned/coati-tri-ecm/" $$1 ".coati-tri-ecm.fasta" }' | tar cvzf $@ -T -
-
-step/2_empirical_alignments: raw_fasta_aligned/coati-tri-ecm/coati-tri-ecm.archive.tar.gz
 
 ## COATI MAR-MG ################################################################
 
@@ -111,11 +104,6 @@ raw_fasta_aligned/coati-mar-mg: $(RAWALN_FILES_COATI_MARMG)
 
 step/2_empirical_alignments: raw_fasta_aligned/coati-mar-mg
 
-raw_fasta_aligned/coati-mar-mg/coati-mar-mg.archive.tar.gz: raw_fasta/hs-gg_gene_pairs.csv.gz $(RAWALN_FILES_COATI_MARMG)
-	zcat $< | awk -F, 'NR > 1 { print "raw_fasta_aligned/coati-mar-mg/" $$1 ".coati-mar-mg.fasta" }' | tar cvzf $@ -T -
-
-step/2_empirical_alignments: raw_fasta_aligned/coati-mar-mg/coati-mar-mg.archive.tar.gz
-
 ## COATI MAR-ECM ###############################################################
 
 RAWALN_FILES_COATI_MARECM=$(addprefix raw_fasta_aligned/coati-mar-ecm/,\
@@ -126,11 +114,6 @@ raw_fasta_aligned/coati-mar-ecm: $(RAWALN_FILES_COATI_MARECM)
 .PHONY: raw_fasta_aligned/coati-mar-ecm
 
 step/2_empirical_alignments: raw_fasta_aligned/coati-mar-ecm
-
-raw_fasta_aligned/coati-mar-ecm/coati-mar-ecm.archive.tar.gz: raw_fasta/hs-gg_gene_pairs.csv.gz $(RAWALN_FILES_COATI_MARECM)
-	zcat $< | awk -F, 'NR > 1 { print "raw_fasta_aligned/coati-mar-ecm/" $$1 ".coati-mar-ecm.fasta" }' | tar cvzf $@ -T -
-
-step/2_empirical_alignments: raw_fasta_aligned/coati-mar-ecm/coati-mar-ecm.archive.tar.gz
 
 ## COATI DNA ###################################################################
 
@@ -143,11 +126,6 @@ raw_fasta_aligned/coati-dna: $(RAWALN_FILES_COATI_DNA)
 
 step/2_empirical_alignments: raw_fasta_aligned/coati-dna
 
-raw_fasta_aligned/coati-dna/coati-dna.archive.tar.gz: raw_fasta/hs-gg_gene_pairs.csv.gz $(RAWALN_FILES_COATI_DNA)
-	zcat $< | awk -F, 'NR > 1 { print "raw_fasta_aligned/coati-dna/" $$1 ".coati-dna.fasta" }' | tar cvzf $@ -T -
-
-step/2_empirical_alignments: raw_fasta_aligned/coati-dna/coati-dna.archive.tar.gz
-
 ## REV COATI TRI-MG ############################################################
 
 RAWALN_FILES_REV_COATI=$(addprefix raw_fasta_aligned/rev-coati-tri-mg/,\
@@ -158,11 +136,6 @@ raw_fasta_aligned/rev-coati-tri-mg: $(RAWALN_FILES_REV_COATI)
 .PHONY: raw_fasta_aligned/rev-coati-tri-mg
 
 step/2_empirical_alignments: raw_fasta_aligned/rev-coati-tri-mg
-
-raw_fasta_aligned/rev-coati-tri-mg/rev-coati-tri-mg.archive.tar.gz: raw_fasta/hs-gg_gene_pairs.csv.gz $(RAWALN_FILES_REV_COATI)
-	zcat $< | awk -F, 'NR > 1 { print "raw_fasta_aligned/rev-coati-tri-mg/" $$1 ".rev-coati-tri-mg.fasta" }' | tar cvzf $@ -T -
-
-step/2_empirical_alignments: raw_fasta_aligned/rev-coati-tri-mg/rev-coati-tri-mg.archive.tar.gz
 
 ## PRANK #######################################################################
 
@@ -175,11 +148,6 @@ raw_fasta_aligned/prank: $(RAWALN_FILES_PRANK)
 
 step/2_empirical_alignments: raw_fasta_aligned/prank
 
-raw_fasta_aligned/prank/prank.archive.tar.gz: raw_fasta/hs-gg_gene_pairs.csv.gz $(RAWALN_FILES_PRANK)
-	zcat $< | awk -F, 'NR > 1 { print "raw_fasta_aligned/prank/" $$1 ".prank.fasta" }' | tar cvzf $@ -T -
-
-step/2_empirical_alignments: raw_fasta_aligned/prank/prank.archive.tar.gz
-
 ## MAFFT #######################################################################
 
 RAWALN_FILES_MAFFT=$(addprefix raw_fasta_aligned/mafft/,\
@@ -190,11 +158,6 @@ raw_fasta_aligned/mafft: $(RAWALN_FILES_MAFFT)
 .PHONY: raw_fasta_aligned/mafft
 
 step/2_empirical_alignments: raw_fasta_aligned/mafft
-
-raw_fasta_aligned/mafft/mafft.archive.tar.gz: raw_fasta/hs-gg_gene_pairs.csv.gz $(RAWALN_FILES_MAFFT)
-	zcat $< | awk -F, 'NR > 1 { print "raw_fasta_aligned/mafft/" $$1 ".mafft.fasta" }' | tar cvzf $@ -T -
-
-step/2_empirical_alignments: raw_fasta_aligned/mafft/mafft.archive.tar.gz
 
 ## CLUSTAL OMEGA ################################################################
 
@@ -207,11 +170,6 @@ raw_fasta_aligned/clustalo: $(RAWALN_FILES_CLUSTALO)
 
 step/2_empirical_alignments: raw_fasta_aligned/clustalo
 
-raw_fasta_aligned/clustalo/clustalo.archive.tar.gz: raw_fasta/hs-gg_gene_pairs.csv.gz $(RAWALN_FILES_CLUSTALO)
-	zcat $< | awk -F, 'NR > 1 { print "raw_fasta_aligned/clustalo/" $$1 ".clustalo.fasta" }' | tar cvzf $@ -T -
-
-step/2_empirical_alignments: raw_fasta_aligned/clustalo/clustalo.archive.tar.gz
-
 ## MACSE #######################################################################
 
 RAWALN_FILES_MACSE=$(addprefix raw_fasta_aligned/macse/,\
@@ -222,29 +180,6 @@ raw_fasta_aligned/macse: $(RAWALN_FILES_MACSE)
 .PHONY: raw_fasta_aligned/macse
 
 step/2_empirical_alignments: raw_fasta_aligned/macse
-
-raw_fasta_aligned/macse/macse.archive.tar.gz: raw_fasta/hs-gg_gene_pairs.csv.gz $(RAWALN_FILES_MACSE)
-	zcat $< | awk -F, 'NR > 1 { print "raw_fasta_aligned/macse/" $$1 ".macse.fasta" }' | tar cvzf $@ -T -
-
-step/2_empirical_alignments: raw_fasta_aligned/macse/macse.archive.tar.gz
-
-################################################################################
-# STEP 2 (Alt): Extract empirical alignments from archives.                    #
-################################################################################
-
-step/2a_extract_empirical_alignments:
-	tar -xvmf raw_fasta_aligned/clustalo/clustalo.archive.tar.gz
-	tar -xvmf raw_fasta_aligned/coati-dna/coati-dna.archive.tar.gz
-	tar -xvmf raw_fasta_aligned/coati-mar-ecm/coati-mar-ecm.archive.tar.gz
-	tar -xvmf raw_fasta_aligned/coati-mar-mg/coati-mar-mg.archive.tar.gz
-	tar -xvmf raw_fasta_aligned/coati-tri-ecm/coati-tri-ecm.archive.tar.gz
-	tar -xvmf raw_fasta_aligned/coati-tri-mg/coati-tri-mg.archive.tar.gz
-	tar -xvmf raw_fasta_aligned/macse/macse.archive.tar.gz
-	tar -xvmf raw_fasta_aligned/mafft/mafft.archive.tar.gz
-	tar -xvmf raw_fasta_aligned/prank/prank.archive.tar.gz
-	tar -xvmf raw_fasta_aligned/rev-coati-tri-mg/rev-coati-tri-mg.archive.tar.gz
-
-.PHONY: step/2a_extract_empirical_alignments
 
 ################################################################################
 # STEP 3: Generate alignment statistics                                        #
@@ -269,9 +204,9 @@ step/3_generate_stats: results/raw_fasta_aligned_stats.csv.gz
 # STEP 4: Create benchmark alignments                                          #
 ################################################################################
 
-## Benchmark Data ##############################################################
-
-benchmark_fasta/gap_patterns.csv.gz benchmark_fasta/gapped_genes.txt benchmark_fasta/gapless_genes.txt: results/raw_fasta_aligned_stats.csv.gz scripts/gather_benchmark_data.R
+benchmark_fasta/gap_patterns.csv.gz benchmark_fasta/gapped_genes.txt \
+benchmark_fasta/gapless_genes.txt: results/raw_fasta_aligned_stats.csv.gz \
+scripts/gather_benchmark_data.R
 	$(RSCRIPT) scripts/gather_benchmark_data.R
 
 benchmark_fasta/.script_done: benchmark_fasta/gap_patterns.csv.gz benchmark_fasta/gapless_genes.txt scripts/simulate_benchmarks.R
@@ -292,26 +227,6 @@ benchmark_fasta/test_id_list.txt: | benchmark_fasta/gapless_genes.txt
 step/4_simulate_benchmarks: benchmark_fasta/.script_done
 
 .PHONY: step/4_simulate_benchmarks
-
-BENCHMARK_FILES=$(addprefix benchmark_fasta/,$(addsuffix .fasta, $(TEST_IDS)))
-
-benchmark_fasta/benchmark.archive.tar.gz: benchmark_fasta/gapless_genes.txt $(BENCHMARK_FILES)
-	cat $< | awk '{ printf "benchmark_fasta/TEST%06d.fasta\n", NR }' | tar cvzf $@ -T -
-
-BENCHMARK_NOGAPS_FILES=$(addprefix benchmark_fasta_nogaps/,$(addsuffix .nogaps.fasta, $(TEST_IDS)))
-
-benchmark_fasta_nogaps/benchmark_nogaps.archive.tar.gz: benchmark_fasta/gapless_genes.txt $(BENCHMARK_NOGAPS_FILES)
-	cat $< | awk '{ printf "benchmark_fasta_nogaps/TEST%06d.nogaps.fasta\n", NR }' | tar cvzf $@ -T -
-
-################################################################################
-# STEP 4 (Alt): Extract benchmarks from archives.                              #
-################################################################################
-
-step/4a_extract_benchmarks:
-	tar -xvmf benchmark_fasta/benchmark.archive.tar.gz
-	tar -xvmf benchmark_fasta_nogaps/benchmark_nogaps.archive.tar.gz
-
-.PHONY: step/4a_extract_benchmarks
 
 ################################################################################
 # STEP 5: Align benchmark alignments                                           #
@@ -334,11 +249,6 @@ benchmark_fasta_aligned/coati-tri-mg: $(TSTALN_FILES_COATI_TRIMG)
 
 step/5_benchmark_alignments: benchmark_fasta_aligned/coati-tri-mg
 
-benchmark_fasta_aligned/coati-tri-mg/coati-tri-mg.archive.tar.gz: benchmark_fasta/test_id_list.txt $(TSTALN_FILES_COATI_TRIMG)
-	cat $< | awk '{ print "benchmark_fasta_aligned/coati-tri-mg/" $$1 ".coati-tri-mg.fasta" }' | tar cvzf $@ -T -
-
-step/5_benchmark_alignments: benchmark_fasta_aligned/coati-tri-mg/coati-tri-mg.archive.tar.gz
-
 ## COATI TRI-ECM ###############################################################
 
 TSTALN_FILES_COATI_TRIECM=$(addprefix benchmark_fasta_aligned/coati-tri-ecm/, \
@@ -349,11 +259,6 @@ benchmark_fasta_aligned/coati-tri-ecm: $(TSTALN_FILES_COATI_TRIECM)
 .PHONY: benchmark_fasta_aligned/coati-tri-ecm
 
 step/5_benchmark_alignments: benchmark_fasta_aligned/coati-tri-ecm
-
-benchmark_fasta_aligned/coati-tri-ecm/coati-tri-ecm.archive.tar.gz: benchmark_fasta/test_id_list.txt $(TSTALN_FILES_COATI_TRIECM)
-	cat $< | awk '{ print "benchmark_fasta_aligned/coati-tri-ecm/" $$1 ".coati-tri-ecm.fasta" }' | tar cvzf $@ -T -
-
-step/5_benchmark_alignments: benchmark_fasta_aligned/coati-tri-ecm/coati-tri-ecm.archive.tar.gz
 
 ## COATI MAR-MG ################################################################
 
@@ -366,11 +271,6 @@ benchmark_fasta_aligned/coati-mar-mg: $(TSTALN_FILES_COATI_MARMG)
 
 step/5_benchmark_alignments: benchmark_fasta_aligned/coati-mar-mg
 
-benchmark_fasta_aligned/coati-mar-mg/coati-mar-mg.archive.tar.gz: benchmark_fasta/test_id_list.txt $(TSTALN_FILES_COATI_MARMG)
-	cat $< | awk '{ print "benchmark_fasta_aligned/coati-mar-mg/" $$1 ".coati-mar-mg.fasta" }' | tar cvzf $@ -T -
-
-step/5_benchmark_alignments: benchmark_fasta_aligned/coati-mar-mg/coati-mar-mg.archive.tar.gz
-
 ## COATI MAR-ECM ###############################################################
 
 TSTALN_FILES_COATI_MARECM=$(addprefix benchmark_fasta_aligned/coati-mar-ecm/, \
@@ -381,11 +281,6 @@ benchmark_fasta_aligned/coati-mar-ecm: $(TSTALN_FILES_COATI_MARECM)
 .PHONY: benchmark_fasta_aligned/coati-mar-ecm
 
 step/5_benchmark_alignments: benchmark_fasta_aligned/coati-mar-ecm
-
-benchmark_fasta_aligned/coati-mar-ecm/coati-mar-ecm.archive.tar.gz: benchmark_fasta/test_id_list.txt $(TSTALN_FILES_COATI_MARECM)
-	cat $< | awk '{ print "benchmark_fasta_aligned/coati-mar-ecm/" $$1 ".coati-mar-ecm.fasta" }' | tar cvzf $@ -T -
-
-step/5_benchmark_alignments: benchmark_fasta_aligned/coati-mar-ecm/coati-mar-ecm.archive.tar.gz
 
 ## COATI DNA ###################################################################
 
@@ -398,11 +293,6 @@ benchmark_fasta_aligned/coati-dna: $(TSTALN_FILES_COATI_DNA)
 
 step/5_benchmark_alignments: benchmark_fasta_aligned/coati-dna
 
-benchmark_fasta_aligned/coati-dna/coati-dna.archive.tar.gz: benchmark_fasta/test_id_list.txt $(TSTALN_FILES_COATI_DNA)
-	cat $< | awk '{ print "benchmark_fasta_aligned/coati-dna/" $$1 ".coati-dna.fasta" }' | tar cvzf $@ -T -
-
-step/5_benchmark_alignments: benchmark_fasta_aligned/coati-dna/coati-dna.archive.tar.gz
-
 ## REV COATI TRI-MG ############################################################
 
 TSTALN_FILES_REV_COATI=$(addprefix benchmark_fasta_aligned/rev-coati-tri-mg/, \
@@ -413,11 +303,6 @@ benchmark_fasta_aligned/rev-coati-tri-mg: $(TSTALN_FILES_REV_COATI)
 .PHONY: benchmark_fasta_aligned/rev-coati-tri-mg
 
 step/5_benchmark_alignments: benchmark_fasta_aligned/rev-coati-tri-mg
-
-benchmark_fasta_aligned/rev-coati-tri-mg/rev-coati-tri-mg.archive.tar.gz: benchmark_fasta/test_id_list.txt $(TSTALN_FILES_REV_COATI)
-	cat $< | awk '{ print "benchmark_fasta_aligned/rev-coati-tri-mg/" $$1 ".rev-coati-tri-mg.fasta" }' | tar cvzf $@ -T -
-
-step/5_benchmark_alignments: benchmark_fasta_aligned/rev-coati-tri-mg/rev-coati-tri-mg.archive.tar.gz
 
 ## PRANK #######################################################################
 
@@ -446,11 +331,6 @@ benchmark_fasta_aligned/mafft: $(TSTALN_FILES_MAFFT)
 
 step/5_benchmark_alignments: benchmark_fasta_aligned/mafft
 
-benchmark_fasta_aligned/mafft/mafft.archive.tar.gz: benchmark_fasta/test_id_list.txt $(TSTALN_FILES_MAFFT)
-	cat $< | awk '{ print "benchmark_fasta_aligned/mafft/" $$1 ".mafft.fasta" }' | tar cvzf $@ -T -
-
-step/5_benchmark_alignments: benchmark_fasta_aligned/mafft/mafft.archive.tar.gz
-
 ## CLUSTAL OMEGA ################################################################
 
 TSTALN_FILES_CLUSTALO=$(addprefix benchmark_fasta_aligned/clustalo/, \
@@ -462,11 +342,6 @@ benchmark_fasta_aligned/clustalo: $(TSTALN_FILES_CLUSTALO)
 
 step/5_benchmark_alignments: benchmark_fasta_aligned/clustalo
 
-benchmark_fasta_aligned/clustalo/clustalo.archive.tar.gz: benchmark_fasta/test_id_list.txt $(TSTALN_FILES_CLUSTALO)
-	cat $< | awk '{ print "benchmark_fasta_aligned/clustalo/" $$1 ".clustalo.fasta" }' | tar cvzf $@ -T -
-
-step/5_benchmark_alignments: benchmark_fasta_aligned/clustalo/clustalo.archive.tar.gz
-
 ## MACSE #######################################################################
 
 TSTALN_FILES_MACSE=$(addprefix benchmark_fasta_aligned/macse/, \
@@ -477,29 +352,6 @@ benchmark_fasta_aligned/macse: $(TSTALN_FILES_MACSE)
 .PHONY: benchmark_fasta_aligned/macse
 
 step/5_benchmark_alignments: benchmark_fasta_aligned/macse
-
-benchmark_fasta_aligned/macse/macse.archive.tar.gz: benchmark_fasta/test_id_list.txt $(TSTALN_FILES_MACSE)
-	cat $< | awk '{ print "benchmark_fasta_aligned/macse/" $$1 ".macse.fasta" }' | tar cvzf $@ -T -
-
-step/5_benchmark_alignments: benchmark_fasta_aligned/macse/macse.archive.tar.gz
-
-################################################################################
-# STEP 5a (Alt): Extract benchmark alignments from archives.                   #
-################################################################################
-
-step/5a_extract_benchmark_alignments:
-	tar -xvmf benchmark_fasta_aligned/clustalo/clustalo.archive.tar.gz
-	tar -xvmf benchmark_fasta_aligned/coati-dna/coati-dna.archive.tar.gz
-	tar -xvmf benchmark_fasta_aligned/coati-mar-ecm/coati-mar-ecm.archive.tar.gz
-	tar -xvmf benchmark_fasta_aligned/coati-mar-mg/coati-mar-mg.archive.tar.gz
-	tar -xvmf benchmark_fasta_aligned/coati-tri-ecm/coati-tri-ecm.archive.tar.gz
-	tar -xvmf benchmark_fasta_aligned/coati-tri-mg/coati-tri-mg.archive.tar.gz
-	tar -xvmf benchmark_fasta_aligned/macse/macse.archive.tar.gz
-	tar -xvmf benchmark_fasta_aligned/mafft/mafft.archive.tar.gz
-	tar -xvmf benchmark_fasta_aligned/prank/prank.archive.tar.gz
-	tar -xvmf benchmark_fasta_aligned/rev-coati-tri-mg/rev-coati-tri-mg.archive.tar.gz
-
-.PHONY: step/5a_extract_benchmark_alignments
 
 ################################################################################
 # Clean pipeline results except gene id list and raw fasta downloads		   #
