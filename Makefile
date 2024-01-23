@@ -106,9 +106,6 @@ benchmark_fasta/.script_done: benchmark_fasta/gap_patterns.csv.gz benchmark_fast
 	$(RSCRIPT) scripts/simulate_benchmarks.R
 	touch $@
 
-benchmark_fasta/stats.csv: scripts/aln_data.R
-	$(RSCRIPT) scripts/aln_data.R benchmark_fasta benchmark > $@
-
 benchmark_fasta/test_id_list.mk: | benchmark_fasta/gapless_genes.txt
 	echo "TEST_IDS = \\" > $@
 	cat $| | awk '{ printf "    TEST%06d \\\n", NR }' >> $@
@@ -130,6 +127,27 @@ include benchmark_fasta/test_id_list.mk
 step/5_benchmark_alignments: $(addprefix step/5_benchmark_alignments_,$(METHODS))
 
 .PHONY: step/5_benchmark_alignments
+
+################################################################################
+# STEP 6: Generate benchmark statistics                                        #
+################################################################################
+
+benchmark_fasta/stats.csv.gz: scripts/aln_data.R
+	$(RSCRIPT) scripts/aln_data.R benchmark_fasta benchmark $@
+
+benchmark_fasta_aligned/%/stats.csv.gz: scripts/aln_data.R
+	$(RSCRIPT) scripts/aln_data.R raw_fasta_aligned/$* $* $@
+
+results/benchmark_fasta_aligned_stats.csv.gz: benchmark_fasta/stats.csv.gz \
+$(addprefix benchmark_fasta_aligned/,$(addsuffix /stats.csv.gz,$(METHODS)))
+	$(RSCRIPT) -e "commandArgs(TRUE) |> \
+	purrr::map(\(x) readr::read_csv(x, col_types = readr::cols(.default = \"c\"))) |> \
+	purrr::list_rbind() |> readr::write_csv(\"$@\")" $^
+
+step/6_generate_stats: results/benchmark_fasta_aligned_stats.csv.gz
+
+.PHONY: step/6_generate_stats
+
 
 ################################################################################
 
