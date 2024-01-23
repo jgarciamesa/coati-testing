@@ -42,7 +42,8 @@ raw_fasta/.script_done: scripts/write_raw_fasta.R raw_fasta/hs-gg_gene_pairs.csv
 		raw_fasta
 	touch $@
 
-raw_fasta/gene_id_list.mk: | raw_fasta/hs-gg_gene_pairs.csv.gz
+# NOTE: depends on raw_fasta/hs-gg_gene_pairs.csv.gz
+raw_fasta/gene_id_list.mk:
 	echo "GENE_IDS = \\" > $@
 	zcat raw_fasta/hs-gg_gene_pairs.csv.gz | awk -F, 'NR > 1 { print "    " $$1 " \\" }' >> $@
 	echo "" >> $@
@@ -106,9 +107,10 @@ benchmark_fasta/.script_done: benchmark_fasta/gap_patterns.csv.gz benchmark_fast
 	$(RSCRIPT) scripts/simulate_benchmarks.R
 	touch $@
 
-benchmark_fasta/test_id_list.mk: | benchmark_fasta/gapless_genes.txt
+# NOTE: depends on benchmark_fasta/gapless_genes.txt
+benchmark_fasta/test_id_list.mk:
 	echo "TEST_IDS = \\" > $@
-	cat $| | awk '{ printf "    TEST%06d \\\n", NR }' >> $@
+	awk '{ printf "    TEST%06d \\\n", NR }' benchmark_fasta/gapless_genes.txt >> $@
 	echo "" >> $@
 
 benchmark_fasta/test_id_list.txt: | benchmark_fasta/gapless_genes.txt
@@ -136,7 +138,7 @@ benchmark_fasta/stats.csv.gz: scripts/aln_data.R
 	$(RSCRIPT) scripts/aln_data.R benchmark_fasta benchmark $@
 
 benchmark_fasta_aligned/%/stats.csv.gz: scripts/aln_data.R
-	$(RSCRIPT) scripts/aln_data.R raw_fasta_aligned/$* $* $@
+	$(RSCRIPT) scripts/aln_data.R benchmark_fasta_aligned/$* $* $@
 
 results/benchmark_fasta_aligned_stats.csv.gz: benchmark_fasta/stats.csv.gz \
 $(addprefix benchmark_fasta_aligned/,$(addsuffix /stats.csv.gz,$(METHODS)))
@@ -147,7 +149,6 @@ $(addprefix benchmark_fasta_aligned/,$(addsuffix /stats.csv.gz,$(METHODS)))
 step/6_generate_stats: results/benchmark_fasta_aligned_stats.csv.gz
 
 .PHONY: step/6_generate_stats
-
 
 ################################################################################
 

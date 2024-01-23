@@ -7,6 +7,9 @@ library(stringr)
 library(seqinr)
 library(ape)
 library(fs)
+library(here)
+
+COATI_BIN <- here("bin", "coati-alignpair")
 
 calculate_omega <- function(aln) { #dN/dS
     k <- kaks(aln)
@@ -39,20 +42,35 @@ create_cigar <- function(anc, dec, use_match = FALSE) {
     str_c(x$lengths, x$values, collapse="")
 }
 
-# path <- "raw_fasta_aligned/coati-tri-mg/ENSG00000000419.coati-tri-mg.fasta"
+calculate_score <- function(file) {
+    results <- system2(COATI_BIN,
+        args = c("-s", "-m", "mar-mg",
+            file), stdout = TRUE)
+    if(is.integer(results)) {
+        return(NA_real_)
+    } else if(is.integer(attr(results, "status"))) {
+        return(NA_real_)
+    } else if(length(results) == 0) {
+        return(NA_real_)
+    }
+    as.double(results)
+}
+
+read_fasta <- purrr::possibly(seqinr::read.fasta, quiet = TRUE)
 
 process_file <- function(path, method) {
     file <- path_file(path) |> path_ext_remove()
     gene <- path_ext_remove(file)
     method <- method %||% path_ext(file)
 
-    x <- try(seqinr::read.fasta(path, forceDNAtolower = FALSE), silent = TRUE)
+    x <- read_fasta(path, forceDNAtolower = FALSE)
 
-    if(inherits(x, "try-error")) {
+    if(is.null(x)) {
         return(list(
             gene = gene,
             method = method,
             cigar = NA_character_,
+            score = NA_real_,
             omega = NA_real_,
             k2p = NA_real_,
             checksum = NA_character_,
@@ -81,10 +99,12 @@ process_file <- function(path, method) {
         cigar <- create_cigar(anc, dec)
         omega <- calculate_omega(a)
         k2p <- dist.dna(as.DNAbin(a), model = "K80")
+        score <- calculate_score(path)
     } else {
         cigar <- NA_character_
         omega <- NA_real_
         k2p <- NA_real_
+        score <- NA_real_
     }
 
     # Create a checksum of the unaligned sequences
@@ -97,6 +117,7 @@ process_file <- function(path, method) {
         gene = gene,
         method = method,
         cigar = cigar,
+        score = score,
         omega = omega,
         k2p = c(k2p),
         checksum = checksum,
@@ -108,7 +129,7 @@ process_file <- function(path, method) {
 aln_data_main <- function(input_dir, method) {
     files <- dir_ls(input_dir, type = "file", regexp = "\\b(ENS|TEST)*.fasta$")
 
-    dat <- files |> map(\(x) process_file(x, method))
+    dat <- files |> map(\(x) process_file(x, method), .progress = TRUE)
     dat <- dat |> map(as_tibble_row) |>
         list_rbind()
 
