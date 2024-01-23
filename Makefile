@@ -63,130 +63,23 @@ step/1_download_raw_fasta: raw_fasta
 # STEP 2: Align empirical CDS sequences                                        #
 ################################################################################
 
+METHODS = clustalo coati-dna coati-mar-ecm coati-mar-mg coati-tri-ecm \
+    coati-tri-mg macse mafft prank rev-coati-tri-mg
+
 # aligner commands are stored in a different file so they can be used
 # without make having to process the full dependency list
 include align.mk
 
-step/2_empirical_alignments:
+step/2_empirical_alignments: $(addprefix step/2_empirical_alignments_,$(METHODS))
 
 .PHONY: step/2_empirical_alignments
 
-## COATI TRI-MG ################################################################
-
-RAWALN_FILES_COATI_TRIMG=$(addprefix raw_fasta_aligned/coati-tri-mg/,\
-    $(addsuffix .coati-tri-mg.fasta, $(GENE_IDS)))
-
-raw_fasta_aligned/coati-tri-mg: $(RAWALN_FILES_COATI_TRIMG)
-
-.PHONY: raw_fasta_aligned/coati-tri-mg
-
-step/2_empirical_alignments: raw_fasta_aligned/coati-tri-mg
-
-## COATI TRI-ECM ###############################################################
-
-RAWALN_FILES_COATI_TRIECM=$(addprefix raw_fasta_aligned/coati-tri-ecm/,\
-    $(addsuffix .coati-tri-ecm.fasta, $(GENE_IDS)))
-
-raw_fasta_aligned/coati-tri-ecm: $(RAWALN_FILES_COATI_TRIECM)
-
-.PHONY: raw_fasta_aligned/coati-tri-ecm
-
-step/2_empirical_alignments: raw_fasta_aligned/coati-tri-ecm
-
-## COATI MAR-MG ################################################################
-
-RAWALN_FILES_COATI_MARMG=$(addprefix raw_fasta_aligned/coati-mar-mg/,\
-    $(addsuffix .coati-mar-mg.fasta, $(GENE_IDS)))
-
-raw_fasta_aligned/coati-mar-mg: $(RAWALN_FILES_COATI_MARMG)
-
-.PHONY: raw_fasta_aligned/coati-mar-mg
-
-step/2_empirical_alignments: raw_fasta_aligned/coati-mar-mg
-
-## COATI MAR-ECM ###############################################################
-
-RAWALN_FILES_COATI_MARECM=$(addprefix raw_fasta_aligned/coati-mar-ecm/,\
-    $(addsuffix .coati-mar-ecm.fasta, $(GENE_IDS)))
-
-raw_fasta_aligned/coati-mar-ecm: $(RAWALN_FILES_COATI_MARECM)
-
-.PHONY: raw_fasta_aligned/coati-mar-ecm
-
-step/2_empirical_alignments: raw_fasta_aligned/coati-mar-ecm
-
-## COATI DNA ###################################################################
-
-RAWALN_FILES_COATI_DNA=$(addprefix raw_fasta_aligned/coati-dna/,\
-    $(addsuffix .coati-dna.fasta, $(GENE_IDS)))
-
-raw_fasta_aligned/coati-dna: $(RAWALN_FILES_COATI_DNA)
-
-.PHONY: raw_fasta_aligned/coati-dna
-
-step/2_empirical_alignments: raw_fasta_aligned/coati-dna
-
-## REV COATI TRI-MG ############################################################
-
-RAWALN_FILES_REV_COATI=$(addprefix raw_fasta_aligned/rev-coati-tri-mg/,\
-    $(addsuffix .rev-coati-tri-mg.fasta, $(GENE_IDS)))
-
-raw_fasta_aligned/rev-coati-tri-mg: $(RAWALN_FILES_REV_COATI)
-
-.PHONY: raw_fasta_aligned/rev-coati-tri-mg
-
-step/2_empirical_alignments: raw_fasta_aligned/rev-coati-tri-mg
-
-## PRANK #######################################################################
-
-RAWALN_FILES_PRANK=$(addprefix raw_fasta_aligned/prank/,\
-    $(addsuffix .prank.fasta, $(GENE_IDS)))
-
-raw_fasta_aligned/prank: $(RAWALN_FILES_PRANK)
-
-.PHONY: raw_fasta_aligned/prank
-
-step/2_empirical_alignments: raw_fasta_aligned/prank
-
-## MAFFT #######################################################################
-
-RAWALN_FILES_MAFFT=$(addprefix raw_fasta_aligned/mafft/,\
-    $(addsuffix .mafft.fasta, $(GENE_IDS)))
-
-raw_fasta_aligned/mafft: $(RAWALN_FILES_MAFFT)
-
-.PHONY: raw_fasta_aligned/mafft
-
-step/2_empirical_alignments: raw_fasta_aligned/mafft
-
-## CLUSTAL OMEGA ################################################################
-
-RAWALN_FILES_CLUSTALO=$(addprefix raw_fasta_aligned/clustalo/,\
-    $(addsuffix .clustalo.fasta, $(GENE_IDS)))
-
-raw_fasta_aligned/clustalo: $(RAWALN_FILES_CLUSTALO)
-
-.PHONY: raw_fasta_aligned/clustalo
-
-step/2_empirical_alignments: raw_fasta_aligned/clustalo
-
-## MACSE #######################################################################
-
-RAWALN_FILES_MACSE=$(addprefix raw_fasta_aligned/macse/,\
-    $(addsuffix .macse.fasta, $(GENE_IDS)))
-
-raw_fasta_aligned/macse: $(RAWALN_FILES_MACSE)
-
-.PHONY: raw_fasta_aligned/macse
-
-step/2_empirical_alignments: raw_fasta_aligned/macse
+# NOTE: The empirical alignment rules are at the end of this file because they
+# require secondary expansion.
 
 ################################################################################
 # STEP 3: Generate alignment statistics                                        #
 ################################################################################
-
-METHODS = clustalo coati-dna coati-mar-ecm coati-mar-mg coati-tri-ecm \
-    coati-tri-mg macse mafft prank rev-coati-tri-mg
 
 raw_fasta_aligned/%/stats.csv.gz: scripts/aln_data.R
 	$(RSCRIPT) scripts/aln_data.R raw_fasta_aligned/$* $* $@
@@ -234,139 +127,30 @@ step/4_simulate_benchmarks: benchmark_fasta/.script_done
 
 include benchmark_fasta/test_id_list.mk
 
-step/5_benchmark_alignments:
+step/5_benchmark_alignments: $(addprefix step/5_benchmark_alignments_,$(METHODS))
 
 .PHONY: step/5_benchmark_alignments
 
-## COATI TRI-MG ################################################################
-
-TSTALN_FILES_COATI_TRIMG=$(addprefix benchmark_fasta_aligned/coati-tri-mg/, \
-    $(addsuffix .coati-tri-mg.fasta, $(TEST_IDS)))
-
-benchmark_fasta_aligned/coati-tri-mg: $(TSTALN_FILES_COATI_TRIMG)
-
-.PHONY: benchmark_fasta_aligned/coati-tri-mg
-
-step/5_benchmark_alignments: benchmark_fasta_aligned/coati-tri-mg
-
-## COATI TRI-ECM ###############################################################
-
-TSTALN_FILES_COATI_TRIECM=$(addprefix benchmark_fasta_aligned/coati-tri-ecm/, \
-    $(addsuffix .coati-tri-ecm.fasta, $(TEST_IDS)))
-
-benchmark_fasta_aligned/coati-tri-ecm: $(TSTALN_FILES_COATI_TRIECM)
-
-.PHONY: benchmark_fasta_aligned/coati-tri-ecm
-
-step/5_benchmark_alignments: benchmark_fasta_aligned/coati-tri-ecm
-
-## COATI MAR-MG ################################################################
-
-TSTALN_FILES_COATI_MARMG=$(addprefix benchmark_fasta_aligned/coati-mar-mg/, \
-    $(addsuffix .coati-mar-mg.fasta, $(TEST_IDS)))
-
-benchmark_fasta_aligned/coati-mar-mg: $(TSTALN_FILES_COATI_MARMG)
-
-.PHONY: benchmark_fasta_aligned/coati-mar-mg
-
-step/5_benchmark_alignments: benchmark_fasta_aligned/coati-mar-mg
-
-## COATI MAR-ECM ###############################################################
-
-TSTALN_FILES_COATI_MARECM=$(addprefix benchmark_fasta_aligned/coati-mar-ecm/, \
-    $(addsuffix .coati-mar-ecm.fasta, $(TEST_IDS)))
-
-benchmark_fasta_aligned/coati-mar-ecm: $(TSTALN_FILES_COATI_MARECM)
-
-.PHONY: benchmark_fasta_aligned/coati-mar-ecm
-
-step/5_benchmark_alignments: benchmark_fasta_aligned/coati-mar-ecm
-
-## COATI DNA ###################################################################
-
-TSTALN_FILES_COATI_DNA=$(addprefix benchmark_fasta_aligned/coati-dna/, \
-    $(addsuffix .coati-dna.fasta, $(TEST_IDS)))
-
-benchmark_fasta_aligned/coati-dna: $(TSTALN_FILES_COATI_DNA)
-
-.PHONY: benchmark_fasta_aligned/coati-dna
-
-step/5_benchmark_alignments: benchmark_fasta_aligned/coati-dna
-
-## REV COATI TRI-MG ############################################################
-
-TSTALN_FILES_REV_COATI=$(addprefix benchmark_fasta_aligned/rev-coati-tri-mg/, \
-    $(addsuffix .rev-coati-tri-mg.fasta, $(TEST_IDS)))
-
-benchmark_fasta_aligned/rev-coati-tri-mg: $(TSTALN_FILES_REV_COATI)
-
-.PHONY: benchmark_fasta_aligned/rev-coati-tri-mg
-
-step/5_benchmark_alignments: benchmark_fasta_aligned/rev-coati-tri-mg
-
-## PRANK #######################################################################
-
-TSTALN_FILES_PRANK=$(addprefix benchmark_fasta_aligned/prank/, \
-    $(addsuffix .prank.fasta, $(TEST_IDS)))
-
-benchmark_fasta_aligned/prank: $(TSTALN_FILES_PRANK)
-
-.PHONY: benchmark_fasta_aligned/prank
-
-step/5_benchmark_alignments: benchmark_fasta_aligned/prank
-
-benchmark_fasta_aligned/prank/prank.archive.tar.gz: benchmark_fasta/test_id_list.txt $(TSTALN_FILES_PRANK)
-	cat $< | awk '{ print "benchmark_fasta_aligned/prank/" $$1 ".prank.fasta" }' | tar cvzf $@ -T -
-
-step/5_benchmark_alignments: benchmark_fasta_aligned/prank/prank.archive.tar.gz
-
-## MAFFT #######################################################################
-
-TSTALN_FILES_MAFFT=$(addprefix benchmark_fasta_aligned/mafft/, \
-    $(addsuffix .mafft.fasta, $(TEST_IDS)))
-
-benchmark_fasta_aligned/mafft: $(TSTALN_FILES_MAFFT)
-
-.PHONY: benchmark_fasta_aligned/mafft
-
-step/5_benchmark_alignments: benchmark_fasta_aligned/mafft
-
-## CLUSTAL OMEGA ################################################################
-
-TSTALN_FILES_CLUSTALO=$(addprefix benchmark_fasta_aligned/clustalo/, \
-    $(addsuffix .clustalo.fasta, $(TEST_IDS)))
-
-benchmark_fasta_aligned/clustalo: $(TSTALN_FILES_CLUSTALO)
-
-.PHONY: benchmark_fasta_aligned/clustalo
-
-step/5_benchmark_alignments: benchmark_fasta_aligned/clustalo
-
-## MACSE #######################################################################
-
-TSTALN_FILES_MACSE=$(addprefix benchmark_fasta_aligned/macse/, \
-    $(addsuffix .macse.fasta, $(TEST_IDS)))
-
-benchmark_fasta_aligned/macse: $(TSTALN_FILES_MACSE)
-
-.PHONY: benchmark_fasta_aligned/macse
-
-step/5_benchmark_alignments: benchmark_fasta_aligned/macse
-
-################################################################################
-# Clean pipeline results except gene id list and raw fasta downloads		   #
 ################################################################################
 
-.PHONY: clean_pipeline
+################################################################################
+# TARGETS NEEDING SECONDEXPANSION                                              #
+################################################################################
 
-clean_pipeline:
-	rm -f data/{filtered,gaps,gaps_cigar,nogaps}.csv
-	rm -f data/no_gaps_ref/*.fasta
-	rm -f data/ref_alignments/*.fasta
-	rm -f data/ref_alignments.csv
-	rm -f data/cigar.rda
-	rm -f aln/{tri-mg,mar-mg,dna,tri-ecm,mar-ecm,prank,mafft,clustalo,macse}/*.fasta
-	rm -f aln/ref/{tri-mg,mar-mg,dna,tri-ecm,mar-ecm,prank,mafft,clustalo,macse}/*.fasta
-	rm -f results/results_summary.csv
+.SECONDEXPANSION:
+
+## EMPIRICAL ALIGNMENT #########################################################
+
+$(addprefix step/2_empirical_alignments_,$(METHODS)): step/2_empirical_alignments_%: \
+	$$(addprefix raw_fasta_aligned/$$*/,$$(addsuffix .$$*.fasta,$$(GENE_IDS)))
+
+.PHONY: $(addprefix step/2_empirical_alignments_,$(METHODS))
+
+## BENCHMARK ALIGNMENT #########################################################
+
+$(addprefix step/5_benchmark_alignments_,$(METHODS)): step/5_benchmark_alignments_%: \
+	$$(addprefix benchmark_fasta_aligned/$$*/,$$(addsuffix .$$*.fasta,$$(TEST_IDS)))
+
+.PHONY: $(addprefix step/5_benchmark_alignments_,$(METHODS))
 
 # find raw_fasta_aligned -type f -name '*.fasta' -exec touch {} +
