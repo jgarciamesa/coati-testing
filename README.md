@@ -1,3 +1,5 @@
+[![DOI](https://zenodo.org/badge/533037260.svg)](https://zenodo.org/doi/10.5281/zenodo.11515933)
+
 # coati-testing
 
 Pipeline to test COATi by simulating alignments with biologically-like indels.
